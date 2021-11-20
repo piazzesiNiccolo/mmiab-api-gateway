@@ -113,6 +113,15 @@ paths:
       responses:
         302:
           description: Redirects to the homepage
+
+  /users_list:
+    get:
+      tags: [ User ]
+      summary: This method allows to retrieve the list of all existing users
+      responses:
+        200:
+          description: Renders the users_list template, containing basic infos about all users
+
   /user/:
     get:
       tags: [ User ]

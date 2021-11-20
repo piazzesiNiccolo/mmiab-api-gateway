@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required)
 
 from mib.forms import UserForm
@@ -73,4 +73,17 @@ def delete_user(id):
         return redirect(url_for('auth.profile', id=id))
         
     return redirect(url_for('home.index'))
+
+@users.route('/users_list', methods=['GET'])
+@login_required
+def users_list():
+    _q = request.args.get("q", None)
+    user_list = []
+    # user_list = list(
+    #     filter(
+    #         lambda u: u.id != current_user.id,
+    #         UserModel.search_user_by_keyword(current_user.id, _q),
+    #     )
+    # )
+    return render_template("users_list.html", list=user_list)
 
