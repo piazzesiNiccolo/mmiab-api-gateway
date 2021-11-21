@@ -114,7 +114,7 @@ paths:
         302:
           description: Redirects to the homepage
 
-  /users_list:
+  /users:
     get:
       tags: [ User ]
       summary: This method allows to retrieve the list of all existing users
