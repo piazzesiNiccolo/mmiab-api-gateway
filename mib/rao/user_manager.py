@@ -3,12 +3,18 @@ from mib import app
 from flask_login import (logout_user)
 from flask import abort
 import requests
-
+from typing import List
 
 class UserManager:
     USERS_ENDPOINT = app.config['USERS_MS_URL']
     REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
 
+    @classmethod
+    def get_users_list(query: str) -> List[User]:
+        endpoint = f"{cls.USERS_ENDPOINT}/users_list?q={query}"
+        response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+        json = response.json()
+        # build users from jsonn in the forma for templates
     @classmethod
     def get_user_by_id(cls, user_id: int) -> User:
         """
