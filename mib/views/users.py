@@ -20,16 +20,16 @@ def create_user():
     if form.is_submitted():
         email = form.data['email']
         password = form.data['password']
-        firstname = form.data['firstname']
-        lastname = form.data['lastname']
+        first_name = form.data['first_name']
+        last_name = form.data['last_name']
         birthdate = form.data['birthdate']
         date = birthdate.strftime('%Y-%m-%d')
         phone = form.data['phone']
         response = UserManager.create_user(
             email,
             password,
-            firstname,
-            lastname,
+            first_name,
+            last_name,
             date,
             phone
         )
@@ -78,12 +78,13 @@ def delete_user(id):
 @login_required
 def users_list():
     _q = request.args.get("q", None)
-    user_list = []
-    # user_list = list(
-    #     filter(
-    #         lambda u: u.id != current_user.id,
-    #         UserModel.search_user_by_keyword(current_user.id, _q),
-    #     )
-    # )
+    response = UserManager.get_users_list(_q)
+
+    if response.status_code != 200:
+        flash("Unexpected response from users microservice!")
+        return redirect(url_for('home.index'))
+
+    user_list = response.json()['users']
+
     return render_template("users_list.html", list=user_list)
 

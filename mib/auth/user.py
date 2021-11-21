@@ -37,6 +37,7 @@ class User(UserMixin):
     def get_id(self):
         return self.id
 
+    @property
     def is_authenticated(self):
         return self.authenticated
 
