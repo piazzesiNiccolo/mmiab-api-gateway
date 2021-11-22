@@ -43,6 +43,7 @@ def create_app():
     # loading login manager
     import mib.auth.login_manager as lm
     login = lm.init_login_manager(app)
+    login.init_app(app)
 
     if flask_env == 'testing' or flask_env == 'development':
         register_test_blueprints(app)

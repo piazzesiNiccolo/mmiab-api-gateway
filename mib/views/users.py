@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required)
 
 from mib.forms import UserForm
@@ -20,16 +20,16 @@ def create_user():
     if form.is_submitted():
         email = form.data['email']
         password = form.data['password']
-        firstname = form.data['firstname']
-        lastname = form.data['lastname']
+        first_name = form.data['first_name']
+        last_name = form.data['last_name']
         birthdate = form.data['birthdate']
         date = birthdate.strftime('%Y-%m-%d')
         phone = form.data['phone']
         response = UserManager.create_user(
             email,
             password,
-            firstname,
-            lastname,
+            first_name,
+            last_name,
             date,
             phone
         )
@@ -73,4 +73,18 @@ def delete_user(id):
         return redirect(url_for('auth.profile', id=id))
         
     return redirect(url_for('home.index'))
+
+@users.route('/users', methods=['GET'])
+@login_required
+def users_list():
+    _q = request.args.get("q", None)
+    response = UserManager.get_users_list(_q)
+
+    if response.status_code != 200:
+        flash("Unexpected response from users microservice!")
+        return redirect(url_for('home.index'))
+
+    user_list = response.json()['users']
+
+    return render_template("users_list.html", list=user_list)
 

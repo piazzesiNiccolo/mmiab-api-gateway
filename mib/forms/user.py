@@ -16,12 +16,12 @@ class UserForm(FlaskForm):
         validators=[DataRequired(), Email()]
     )
 
-    firstname = f.StringField(
+    first_name = f.StringField(
         'Firstname',
         validators=[DataRequired()]
     )
 
-    lastname = f.StringField(
+    last_name = f.StringField(
         'Lastname',
         validators=[DataRequired()]
     )
@@ -41,5 +41,5 @@ class UserForm(FlaskForm):
         validators=[DataRequired()]
     )
 
-    display = ['email', 'firstname', 'lastname', 'password',
+    display = ['email', 'first_name', 'last_name', 'password',
                'birthdate', 'phone']

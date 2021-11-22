@@ -3,11 +3,22 @@ from mib import app
 from flask_login import (logout_user)
 from flask import abort
 import requests
-
+from typing import List
 
 class UserManager:
     USERS_ENDPOINT = app.config['USERS_MS_URL']
     REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
+
+    @classmethod
+    def get_users_list(cls, query: str) -> List[User]:
+        endpoint = f"{cls.USERS_ENDPOINT}/users_list?q={query}"
+
+        try:
+            response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return response
 
     @classmethod
     def get_user_by_id(cls, user_id: int) -> User:
@@ -24,6 +35,8 @@ class UserManager:
             if response.status_code == 200:
                 # user is authenticated
                 user = User.build_from_json(json_payload)
+            elif response.status_code == 404:
+                user = None
             else:
                 raise RuntimeError('Server has sent an unrecognized status code %s' % response.status_code)
 
@@ -79,7 +92,7 @@ class UserManager:
     @classmethod
     def create_user(cls,
                     email: str, password: str,
-                    firstname: str, lastname: str,
+                    first_name: str, last_name: str,
                     birthdate, phone: str):
         try:
             url = "%s/user" % cls.USERS_ENDPOINT
@@ -87,8 +100,8 @@ class UserManager:
                                      json={
                                          'email': email,
                                          'password': password,
-                                         'firstname': firstname,
-                                         'lastname': lastname,
+                                         'first_name': first_name,
+                                         'last_name': last_name,
                                          'birthdate': birthdate,
                                          'phone': phone
                                      },
