@@ -17,22 +17,12 @@ def create_user():
     """
     form = UserForm()
 
-    if form.is_submitted():
-        email = form.data['email']
-        password = form.data['password']
-        first_name = form.data['first_name']
-        last_name = form.data['last_name']
-        birthdate = form.data['birthdate']
-        date = birthdate.strftime('%Y-%m-%d')
-        phone = form.data['phone']
-        response = UserManager.create_user(
-            email,
-            password,
-            first_name,
-            last_name,
-            date,
-            phone
-        )
+    if form.validate_on_submit():
+
+        form_dict = {
+            k : form.data[k] for k in form.data if k not in ["csrf_token", "submit"] and form.data[k] is not None
+        }
+        response = UserManager.create_user(form_dict)
 
         if response.status_code == 201:
             # in this case the request is ok!
@@ -43,14 +33,8 @@ def create_user():
         elif response.status_code == 200:
             # user already exists
             flash('User already exists!')
-            return render_template('create_user.html', form=form)
         else:
             flash('Unexpected response from users microservice!')
-            return render_template('create_user.html', form=form)
-    else:
-        for fieldName, errorMessages in form.errors.items():
-            for errorMessage in errorMessages:
-                flash('The field %s is incorrect: %s' % (fieldName, errorMessage))
 
     return render_template('create_user.html', form=form)
 

@@ -1,9 +1,15 @@
+import os
 from mib.auth.user import User
 from mib import app
 from flask_login import (logout_user)
 from flask import abort
+from flask.globals import current_app
 import requests
 from typing import List
+from uuid import uuid4
+from werkzeug.utils import secure_filename
+
+
 
 class UserManager:
     USERS_ENDPOINT = app.config['USERS_MS_URL']
@@ -90,23 +96,28 @@ class UserManager:
         return user
 
     @classmethod
-    def create_user(cls,
-                    email: str, password: str,
-                    first_name: str, last_name: str,
-                    birthdate, phone: str):
+    def create_user( cls, form_data ):
+        form_data['birthdate'] = form_data['birthdate'].strftime("%d/%m/%Y")
+
+        if "profile_picture" in form_data.keys():
+            file = form_data["profile_picture"]
+            name = file.filename
+            name = str(uuid4()) + secure_filename(name)
+
+            path = os.path.join(current_app.config["UPLOAD_FOLDER"], name)
+            form_data['profile_picture'] = name
+            print('PIPPO', os.listdir('/static/assets'))
+            file.save(path)
+        else:
+            form_data['profile_picture'] = "default.png"
+
         try:
             url = "%s/user" % cls.USERS_ENDPOINT
-            response = requests.post(url,
-                                     json={
-                                         'email': email,
-                                         'password': password,
-                                         'first_name': first_name,
-                                         'last_name': last_name,
-                                         'birthdate': birthdate,
-                                         'phone': phone
-                                     },
-                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
-                                     )
+            response = requests.post(
+                url,
+                json=form_data,
+                timeout=cls.REQUESTS_TIMEOUT_SECONDS
+            )
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)

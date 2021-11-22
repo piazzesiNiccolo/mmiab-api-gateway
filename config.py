@@ -50,6 +50,10 @@ class Config(object):
     # secret key
     SECRET_KEY = os.getenv('APP_SECRET_KEY', b'isreallynotsecretatall')
 
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    UPLOAD_EXTENSIONS = ["jpg", "jpeg", "png"]
+    UPLOAD_FOLDER = os.path.join("/static", "assets")
+
 
 class DebugConfig(Config):
     """
