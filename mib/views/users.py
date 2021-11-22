@@ -1,5 +1,8 @@
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required)
+from flask_login import current_user
+
+from typing import Text
 
 from mib.forms import UserForm
 from mib.rao.user_manager import UserManager
@@ -72,3 +75,14 @@ def users_list():
 
     return render_template("users_list.html", list=user_list)
 
+@users.route("/user/<int:id>", methods=["GET"])
+@login_required
+def user_info(id : int) -> Text:
+    response = UserManager.get_user_by_id(id)
+
+    if response == None:
+        flash("User not found!")
+        return redirect(url_for('home.index'))
+
+    print(response.birthdate)
+    return render_template("user_info.html", user=response, user_id=id)
