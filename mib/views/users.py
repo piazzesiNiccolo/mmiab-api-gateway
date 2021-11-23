@@ -11,7 +11,7 @@ from mib.auth.user import User
 users = Blueprint('users', __name__)
 
 
-@users.route('/create_user', methods=['GET', 'POST'])
+@users.route('/create_user/', methods=['GET', 'POST'])
 def create_user():
     """This method allows the creation of a new user into the database
 
@@ -65,15 +65,13 @@ def delete_user(id):
 @login_required
 def users_list():
     _q = request.args.get("q", None)
-    response = UserManager.get_users_list(_q)
+    users, code = UserManager.get_users_list(_q)
 
-    if response.status_code != 200:
+    if code != 200:
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
-    user_list = response.json()['users']
-
-    return render_template("users_list.html", list=user_list)
+    return render_template("users_list.html", list=users)
 
 @users.route("/user/<int:id>", methods=["GET"])
 @login_required
@@ -84,11 +82,52 @@ def user_info(id : int) -> Text:
         flash("User not found!")
         return redirect(url_for('home.index'))
 
-    print(response.birthdate)
-    return render_template("user_info.html", user=response, user_id=id)
 
-@users.route("/user/profile", methods=["GET"])
+    return render_template(
+        "user_info.html", 
+        user=response,
+        blocked=UserManager.is_user_blocked(id),
+    )
+
+@users.route("/profile", methods=["GET"])
 @login_required
 def user_profile() -> Text:
     
     return redirect(url_for("users.user_info", id=current_user.get_id()))
+
+@users.route("/blacklist", methods=['GET'])
+@login_required
+def blacklist():
+    _q = request.args.get("q", None)
+    blacklist, code = UserManager.get_users_list(_q, blacklist=True)
+
+    if code != 200:
+        flash("Unexpected response from users microservice!")
+        return redirect(url_for('home.index'))
+
+    return render_template("users_list.html", list=blacklist, blacklist=True)
+
+@users.route("/blacklist/<int:id>/add", methods=['GET'])
+@login_required
+def add_to_blacklist(id):
+    code, message = UserManager.add_to_blacklist(id)
+
+    if code in [201, 403, 404]:
+        flash(message)
+        return redirect(url_for('users.blacklist'))
+    else:
+        flash("Unexpected response from users microservice!")
+        return redirect(url_for('home.index'))
+
+@users.route("/blacklist/<int:id>/remove", methods=['GET'])
+@login_required
+def remove_from_blacklist(id):
+    code, message = UserManager.remove_from_blacklist(id)
+
+    if code in [202, 404]:
+        flash(message)
+        return redirect(url_for('users.blacklist'))
+    else:
+        flash("Unexpected response from users microservice!")
+        return redirect(url_for('home.index'))
+

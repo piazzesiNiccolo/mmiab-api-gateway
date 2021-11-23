@@ -6,7 +6,9 @@ info:
 servers:
 - url: /
 
+
 paths:
+###################### Home ###########################
   /:
     get:
       tags: [ Home ]
@@ -14,6 +16,8 @@ paths:
       responses:
         200:
           description: Renders the index.html template
+
+###################### Authentication ###########################
 
   /login:
     tags: [ Authentication ]
@@ -52,6 +56,16 @@ paths:
         200:
           description: Calls the login method
   
+  /logout:
+    get:
+      tags: [ Authentication ]
+      summary: Logs out the logged user
+      responses:
+        302:
+          description: Redirects to the homepage
+
+###################### Users ###########################
+
   /user/{id}:
     get:
       tags: [ User ]
@@ -90,14 +104,6 @@ paths:
         302:
           description: Redirects to the user profile page
 
-  /logout:
-    get:
-      tags: [ Authentication ]
-      summary: Logs out the logged user
-      responses:
-        302:
-          description: Redirects to the homepage
-
   /users:
     get:
       tags: [ User ]
@@ -134,12 +140,54 @@ paths:
   
   /user/delete:
     get:
-        tags: [ User ]
-        description: Delete the logged user
-        responses:
-          302:
-            description: User deleted, it redirects to the index page
+      tags: [ User ]
+      description: Delete the logged user
+      responses:
+        302:
+          description: User deleted, it redirects to the index page
 
+  /blacklist:
+    get:
+      tags: [ User ]
+      description: Shows blacklist for the current user
+      responses:
+        200:
+          description: Renders the blacklist template, showing the list of blocked users for the current user
+
+  /blacklist/{id}/add:
+    get:
+      tags: [ User ]
+      description: Adds the user identified by id to the blacklist of the current user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          description: add user with specified id to blacklist
+      responses:
+        302:
+          description: User added to blacklist, it redirects to the blacklist page
+
+  /blacklist/{id}/remove:
+    get:
+    get:
+      tags: [ User ]
+      description: Removes the user identified by id from the blacklist of the current user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          description: remove user with specified id from blacklist
+      responses:
+        302:
+          description: User removed from blacklist, it redirects to the blacklist page
+
+
+
+################################# Components #########################################3
 components:
   schemas:
     User:

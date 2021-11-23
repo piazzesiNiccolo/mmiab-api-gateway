@@ -1,30 +1,34 @@
 import os
 from mib.auth.user import User
 from mib import app
-from flask_login import (logout_user)
+from flask_login import logout_user
+from flask_login import current_user
 from flask import abort
 from flask.globals import current_app
 import requests
 from typing import List
+from typing import Tuple
 from uuid import uuid4
 from werkzeug.utils import secure_filename
-
-
 
 class UserManager:
     USERS_ENDPOINT = app.config['USERS_MS_URL']
     REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
-    def get_users_list(cls, query: str) -> List[User]:
-        endpoint = f"{cls.USERS_ENDPOINT}/users_list?q={query}"
+    def get_users_list(cls, query: str, blacklist: bool = False) -> Tuple[List[User], int]:
+
+        target = "blacklist" if blacklist else "users_list"
+        endpoint = f"{cls.USERS_ENDPOINT}/{target}/{current_user.id}?q={query}"
 
         try:
             response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+
+            users = [ User.build_from_json(u) for u in response.json()['users'] ]
+            return users, response.status_code
+
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
-
-        return response
 
     @classmethod
     def get_user_by_id(cls, user_id: int) -> User:
@@ -205,3 +209,39 @@ class UserManager:
                 'Microservice users returned an invalid status code %s, and message %s'
                 % (response.status_code, json_response['error_message'])
             )
+
+    @classmethod
+    def add_to_blacklist(cls, other_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.USERS_ENDPOINT}/blacklist/{current_user.id}/{other_id}"
+        try:
+            response = requests.put(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            message = response.json()['message']
+
+            return response.status_code, message
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+    @classmethod
+    def remove_from_blacklist(cls, other_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.USERS_ENDPOINT}/blacklist/{current_user.id}/{other_id}"
+        try:
+            response = requests.delete(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            message = response.json()['message']
+
+            return response.status_code, message
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+    @classmethod
+    def is_user_blocked(cls, other_id: int) -> bool:
+        endpoint = f"{cls.USERS_ENDPOINT}/blacklist/{current_user.id}/{other_id}"
+        try:
+
+            response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            return response.json()['blocked']
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return False
+

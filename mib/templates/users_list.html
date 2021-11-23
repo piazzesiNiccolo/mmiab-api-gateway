@@ -18,7 +18,7 @@
         </style>
         <script>
            function searchUser() {
-                var base_url = "{{url_for('home.index') if blacklist == True else url_for('home.index')}}";
+                var base_url = "{{url_for('users.blacklist') if blacklist == True else url_for('users.users_list')}}";
                 location.href = base_url + "?q=" + document.getElementById("search").value;
            }
            function sendToUser(user_id) {
@@ -26,8 +26,8 @@
                 location.href = base_url + "?send_to=" + user_id;
            }
            function unblockUser(user_id) {
-                var base_url = "/user/blacklist/remove/";
-                location.href = base_url + user_id;
+                var url = "/blacklist/" + user_id + "/remove";
+                location.href = url;
            }
         </script>
         <!--
