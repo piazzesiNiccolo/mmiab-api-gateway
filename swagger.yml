@@ -69,7 +69,7 @@ paths:
   /user/{id}:
     get:
       tags: [ User ]
-      summary: Shows the profile page of the customer specified by the id
+      summary: Shows the profile page of the user specified by the id
       parameters:
       - name: id
         in: path
@@ -79,9 +79,15 @@ paths:
           type: integer
       responses:
         200:
-          description: Renders the customer_profile template, filled with the ssn form and the user's reservations
-        302:
-          description: Redirects to the homepage, in case the user accessing the profile is not its owner
+          description: Renders the customer_profile template, filled with the infos from the user's profile
+
+  /profile:
+    get:
+      tags: [ User ]
+      summary: Shows the profile page of the current user
+      responses:
+        200:
+          description: Renders the user_info template, filled with the infos form and the current user's profile
     
   /profile/update:
     get:
