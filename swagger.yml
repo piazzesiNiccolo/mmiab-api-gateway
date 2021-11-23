@@ -54,7 +54,7 @@ paths:
   
   /user/{id}:
     get:
-      tags: [ Profile ]
+      tags: [ User ]
       summary: Shows the profile page of the customer specified by the id
       parameters:
       - name: id
@@ -69,43 +69,27 @@ paths:
         302:
           description: Redirects to the homepage, in case the user accessing the profile is not its owner
     
-    put:
-      summary: Updates the fields for the customer depending on its id
-      tags:
-        - Users
-      parameters:
-        - name: id
-          description: User Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+  /profile/update:
+    get:
+      tags: [ User ]
+      summary: This method allows to retrieve the edit profile page for an existing user
+      responses:
+        200:
+          description: Renders the create_user template, already filled with the fiels for the user's existing data
+
+    post:
+      summary: Updates the fields for the logged user
+      tags: [ User ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  description: the email field for the user
-                password:
-                  type: string
-                  description: the password field for the user
-                phone:
-                  type: string
-                  description: the phone field for the user
-              required:
-                - email
-                - password
-                - phone
+              $ref: '#/components/schemas/UpdateUser'
       responses:
-        200:
-          description: Renders the update_customer template, to allow the customer to modify its data
         302:
-          description: Redirects to the customer profile page
+          description: Redirects to the user profile page
+
   /logout:
     get:
       tags: [ Authentication ]
@@ -128,30 +112,16 @@ paths:
         200:
           description: Renders the users_list template, containing basic infos about all users
 
-  /user/:
+  /create_user:
     get:
       tags: [ User ]
       summary: This method allows to retrieve the sign up page for a new user
-      parameters:
-        - name: type_
-          description: type of the user
-          in: path
-          required: true
-          schema: 
-            type: string
       responses:
         200:
           description: Renders the create_user template, filled with the fiels for the user's data
     post:
-      summary: Add a new customer
+      summary: Add a new user
       tags: [ User ]
-      parameters:
-        - name: type_
-          description: type of the user
-          in: path
-          required: true
-          schema: 
-            type: string
       requestBody:
         required: true
         content:
@@ -162,18 +132,10 @@ paths:
         302:
           description: Redirects to the correct profile page, depending on the type of the user
   
-  /user/{user_id}:
-    delete:
+  /user/delete:
+    get:
         tags: [ User ]
-        description: Delete a user by its id
-        parameters:
-          - name: user_id
-            description: User Unique ID
-            in: path
-            required: true
-            schema:
-              type: integer
-              format: int64
+        description: Delete the logged user
         responses:
           302:
             description: User deleted, it redirects to the index page
@@ -184,8 +146,10 @@ components:
       required:
         - first_name
         - last_name
+        - password
         - email
         - birthdate
+        - phone
       type: object
       properties:
         first_name:
@@ -204,27 +168,10 @@ components:
           type: string
           description: Place of user
           example: Pisa
-        pfp_path:
+        profile_picture:
           type: string
           description: Path of user profile picture
           example: 'default.png'
-        blacklist:
-          type: string
-          description: List of blacklisted users
-          example: '1|2'
-        content_filter:
-          type: boolean
-          description: Flag for content filter of user
-          example: false
-        lottery_points:
-          type: integer
-          description: Number of user lottery points
-          example: 0
-          format: int64
-        is_banned:
-          type: boolean
-          description: Flag indicating if user is banned
-          example: false
         email:
           type: string
           description: User email
@@ -247,3 +194,26 @@ components:
           example: 'abcd1234'
           minLength: 5
           maxLength: 127
+    UpdateUser:
+      required:
+        - email
+        - phone
+      type: object
+      properties:
+        email:
+          type: string
+          description: Customer email
+          example: mario.rossi@example.org
+          format: email
+        password:
+          type: string
+          description: Customer password
+          example: 'abcd1234'
+          minLength: 5
+          maxLength: 127
+        phone:
+          type: string
+          description: Customer phone number
+          example: '+39 3332222384'
+          minLength: 10
+          maxLength: 25
