@@ -11,7 +11,7 @@ from mib.auth.user import User
 users = Blueprint('users', __name__)
 
 
-@users.route('/create_user/', methods=['GET', 'POST'])
+@users.route('/create_user', methods=['GET', 'POST'])
 def create_user():
     """This method allows the creation of a new user into the database
 
