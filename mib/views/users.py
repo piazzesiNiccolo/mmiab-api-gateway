@@ -102,3 +102,9 @@ def user_info(id : int) -> Text:
 
     print(response.birthdate)
     return render_template("user_info.html", user=response, user_id=id)
+
+@users.route("/user/profile", methods=["GET"])
+@login_required
+def user_profile() -> Text:
+    
+    return redirect(url_for("users.user_info", id=current_user.get_id()))
