@@ -82,11 +82,18 @@ def user_info(id : int) -> Text:
         flash("User not found!")
         return redirect(url_for('home.index'))
 
+
     return render_template(
         "user_info.html", 
         user=response,
         blocked=UserManager.is_user_blocked(id),
     )
+
+@users.route("/profile", methods=["GET"])
+@login_required
+def user_profile() -> Text:
+    
+    return redirect(url_for("users.user_info", id=current_user.get_id()))
 
 @users.route("/blacklist", methods=['GET'])
 @login_required
