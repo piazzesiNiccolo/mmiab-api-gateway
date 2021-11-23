@@ -42,9 +42,9 @@ def create_user():
     return render_template('create_user.html', form=form)
 
 
-@users.route('/delete_user/<int:id>', methods=['GET', 'POST'])
+@users.route('/user/delete', methods=['GET'])
 @login_required
-def delete_user(id):
+def delete_user():
     """Deletes the data of the user from the database.
 
     Args:
@@ -54,7 +54,7 @@ def delete_user(id):
         Redirects the view to the home page
     """
 
-    response = UserManager.delete_user(id)
+    response = UserManager.delete_user(current_user.id)
     if response.status_code != 202:
         flash("Error while deleting the user")
         return redirect(url_for('auth.profile', id=id))
