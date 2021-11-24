@@ -190,6 +190,14 @@ paths:
       responses:
         302:
           description: User removed from blacklist, it redirects to the blacklist page
+  
+  /content_filter:
+    get:
+      tags: [ User ]
+      description: Enable content filter for the current user
+      responses:
+        302:
+          description: Content filter on/off, it redirects to user profile page
 
 
 

@@ -140,7 +140,7 @@
                                                 Withdraw Sent Messages!
                                         </a></li>
                                         {% endif %}
-                                        <li><a class="dropdown-item" href="{{url_for('home.index')}}">
+                                        <li><a class="dropdown-item" href="{{url_for('users.set_content_filter')}}">
                                                 {{'Disable' if user.content_filter == True else 'Enable' }} Content Filter
                                         </a></li>
                                         <li><a class="dropdown-item" href="{{url_for('home.index')}}">Blacklist</a></li>
