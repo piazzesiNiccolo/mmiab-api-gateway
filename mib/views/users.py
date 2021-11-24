@@ -46,14 +46,11 @@ def create_user():
 @login_required
 def delete_user():
     """Deletes the data of the user from the database.
-
     Args:
         id_ (int): takes the unique id as a parameter
-
     Returns:
         Redirects the view to the home page
     """
-
     response = UserManager.delete_user(current_user.id)
     if response.status_code != 202:
         if response.status_code == 404:
