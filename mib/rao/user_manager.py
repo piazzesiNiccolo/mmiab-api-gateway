@@ -183,7 +183,7 @@ class UserManager:
     def _content_filter(cls, user_id: int) : 
 
         try:
-            url = f"{cls.USERS_ENDPOINT}/content_filter/{user_id}"
+            url = "%s/content_filter/%s" % (cls.USERS_ENDPOINT, str(user_id))
             response = requests.get(url,timeout=cls.REQUESTS_TIMEOUT_SECONDS)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):

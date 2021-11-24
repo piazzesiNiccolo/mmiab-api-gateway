@@ -68,10 +68,10 @@ def set_content_filter():
     response = UserManager._content_filter(current_user.id)
     if response.status_code == 400:
         flash("Error to set content filter")
-        return redirect(url_for('users.profile', id=current_user.id))
-    elif response.status_code == 200:
-        flash("Content filter value successfully changed!")
-        return redirect(url_for('users.profile', id=current_user.id))
+        return redirect(url_for('users.user_info', id=current_user.id))
+    
+    flash("Content filter value successfully changed!")
+    return redirect(url_for('users.user_info', id=current_user.id))
     
 
 @users.route('/users', methods=['GET'])
