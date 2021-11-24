@@ -61,7 +61,16 @@ def delete_user(id):
         
     return redirect(url_for('home.index'))
 
+@users.route('/content_filter', methods=['GET'])
+@login_required
+def set_content_filter():
 
+    response = UserManager._content_filter(current_user.id)
+    if response.status_code != 202:
+        flash("Error to set content filter")
+        return redirect(url_for('auth.profile', id=id))
+        
+    return redirect(url_for('auth.profile'))
 
 @users.route('/users', methods=['GET'])
 @login_required
