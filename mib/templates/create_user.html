@@ -191,9 +191,9 @@
                     {% if user_data is defined %}
                     <div class="form mb-3 hstack justify-content-center">
                         <div class="rounded-circle d-flex justify-content-center" style="width: 200px; height: 200px; overflow: hidden;">
-                            <img 
-                                src="{{url_for('static',filename='assets/' + (user_data['pfp_path'] if user_data['pfp_path'] is not none else 'default.jpg'))}}"
-                                height="200px">
+                            <!--><img 
+                                src="{#url_for('static',filename='assets/' + (user_data['pfp_path'] if user_data['pfp_path'] is not none else 'default.jpg'))#}"
+                                height="200px"><-->
                         </div>
                     </div>
                     {% endif %}

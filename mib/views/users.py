@@ -4,7 +4,7 @@ from flask_login import current_user
 
 from typing import Text
 
-from mib.forms import UserForm
+from mib.forms import UserForm, EditProfileForm
 from mib.rao.user_manager import UserManager
 from mib.auth.user import User
 
@@ -86,3 +86,32 @@ def user_info(id : int) -> Text:
 
     print(response.birthdate)
     return render_template("user_info.html", user=response, user_id=id)
+
+@users.route("/user/profile/edit", methods=["POST", "GET"])
+@login_required
+def edit_user_profile() -> Text:
+    
+    """
+    route handling editing of user info
+    """
+    form = EditProfileForm()
+
+    if form.validate_on_submit():
+
+        form_dict = {
+            k : form.data[k] for k in form.data if k not in ["csrf_token", "submit"] and form.data[k] is not None
+        }
+        response = UserManager.update_user(form_dict, current_user.get_id())
+
+        if response.status_code == 404:
+            flash("User not found")
+        elif response.status_code == 200:
+            flash("Insert the correct password")
+            return redirect(url_for(users.edit_user_profile))
+        elif response.status_code == 201:
+            flash("User modified correctly")
+
+        return redirect(url_for("users.user_info", id=current_user.get_id()))
+
+    response = UserManager.get_user_by_id(current_user.get_id())
+    return render_template("create_user.html", form=form, user_data=response.__dict__)
