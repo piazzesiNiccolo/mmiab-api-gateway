@@ -1,4 +1,6 @@
 import os
+
+from werkzeug.wrappers import response
 from mib.auth.user import User
 from mib import app
 from flask_login import logout_user
@@ -176,6 +178,23 @@ class UserManager:
             return abort(500)
 
         return response
+
+    @classmethod
+    def _content_filter(cls, user_id: int) : 
+
+        url = f"{cls.USERS_ENDPOINT}/content_filter/{user_id}"
+        response = requests.get(url,timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+
+        try:
+            logout_user()
+            url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(user_id))
+            response = requests.delete(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return response
+        
 
     @classmethod
     def authenticate_user(cls, email: str, password: str) -> User:

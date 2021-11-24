@@ -61,6 +61,8 @@ def delete_user(id):
         
     return redirect(url_for('home.index'))
 
+
+
 @users.route('/users', methods=['GET'])
 @login_required
 def users_list():
