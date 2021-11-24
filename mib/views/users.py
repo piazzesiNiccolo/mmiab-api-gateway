@@ -56,10 +56,12 @@ def delete_user():
 
     response = UserManager.delete_user(current_user.id)
     if response.status_code != 202:
-        flash("Error while deleting the user")
-        return redirect(url_for('auth.profile', id=id))
-        
-    return redirect(url_for('home.index'))
+        if response.status_code == 404:
+            flash("User not found!")
+            return redirect(url_for('auth.profile', id=id))
+    else:
+        flash("User successfully deleted!")
+        return redirect(url_for('home.index'))
 
 @users.route('/users', methods=['GET'])
 @login_required
