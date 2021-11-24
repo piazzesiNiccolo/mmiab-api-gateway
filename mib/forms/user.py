@@ -53,3 +53,9 @@ class UserForm(FlaskForm):
         "birthdate",
         "phone",
     ]
+
+class EditProfileForm(UserForm):
+    password = f.PasswordField("Password", validators=[Optional()])
+    old_password = f.PasswordField("Old Password", validators=[Optional()])
+    new_password = f.PasswordField("New Password", validators=[Optional()])
+    UserForm.display.extend(["new_password", "old_password"])

@@ -131,35 +131,33 @@ class UserManager:
         return response
 
     @classmethod
-    def update_user(cls, user_id: int, email: str, password: str, phone: str):
-        """
-        This method contacts the users microservice
-        to allow the users to update their profiles
-        :param phone:
-        :param password:
-        :param email:
-        :param user_id: the customer id
-            email: the user email
-            password: the user password
-            phone: the user phone
-        :return: User updated
-        """
+    def update_user(cls, form_data, id):
+
+        form_data['birthdate'] = form_data['birthdate'].strftime("%d/%m/%Y")
+
+        if "profile_picture" in form_data.keys():
+            file = form_data["profile_picture"]
+            name = file.filename
+            name = str(uuid4()) + secure_filename(name)
+
+            path = os.path.join(current_app.config["UPLOAD_FOLDER"], name)
+            form_data['profile_picture'] = name
+            print('PIPPO', os.listdir('/static/assets'))
+            file.save(path)
+        else:
+            form_data['profile_picture'] = "default.png"
+
         try:
-            url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(user_id))
+            url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(id))
             response = requests.put(url,
-                                    json={
-                                        'email': email,
-                                        'password': password,
-                                        'phone': phone
-                                    },
+                                    json=form_data,
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
                                     )
-            return response
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
-        raise RuntimeError('Error with searching for the user %s' % user_id)
+        return response
 
     @classmethod
     def delete_user(cls, user_id: int):
