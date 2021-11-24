@@ -251,7 +251,7 @@ class UserManager:
     def report_user(cls, other_id: int) -> Tuple[int, str]:
         endpoint = f"{cls.USERS_ENDPOINT}/report/{current_user.id}/{other_id}"
         try:
-            response = requests.delete(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.put(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             message = response.json()['message']
 
             return response.status_code, message
