@@ -6,7 +6,9 @@ info:
 servers:
 - url: /
 
+
 paths:
+###################### Home ###########################
   /:
     get:
       tags: [ Home ]
@@ -14,6 +16,8 @@ paths:
       responses:
         200:
           description: Renders the index.html template
+
+###################### Authentication ###########################
 
   /login:
     tags: [ Authentication ]
@@ -52,10 +56,20 @@ paths:
         200:
           description: Calls the login method
   
+  /logout:
+    get:
+      tags: [ Authentication ]
+      summary: Logs out the logged user
+      responses:
+        302:
+          description: Redirects to the homepage
+
+###################### Users ###########################
+
   /user/{id}:
     get:
       tags: [ User ]
-      summary: Shows the profile page of the customer specified by the id
+      summary: Shows the profile page of the user specified by the id
       parameters:
       - name: id
         in: path
@@ -65,9 +79,15 @@ paths:
           type: integer
       responses:
         200:
-          description: Renders the customer_profile template, filled with the ssn form and the user's reservations
-        302:
-          description: Redirects to the homepage, in case the user accessing the profile is not its owner
+          description: Renders the customer_profile template, filled with the infos from the user's profile
+
+  /profile:
+    get:
+      tags: [ User ]
+      summary: Shows the profile page of the current user
+      responses:
+        200:
+          description: Renders the user_info template, filled with the infos form and the current user's profile
     
   /profile/update:
     get:
@@ -89,14 +109,6 @@ paths:
       responses:
         302:
           description: Redirects to the user profile page
-
-  /logout:
-    get:
-      tags: [ Authentication ]
-      summary: Logs out the logged user
-      responses:
-        302:
-          description: Redirects to the homepage
 
   /users:
     get:
@@ -134,12 +146,62 @@ paths:
   
   /user/delete:
     get:
-        tags: [ User ]
-        description: Delete the logged user
-        responses:
-          302:
-            description: User deleted, it redirects to the index page
+      tags: [ User ]
+      description: Delete the logged user
+      responses:
+        302:
+          description: User deleted, it redirects to the index page
 
+  /blacklist:
+    get:
+      tags: [ User ]
+      description: Shows blacklist for the current user
+      responses:
+        200:
+          description: Renders the blacklist template, showing the list of blocked users for the current user
+
+  /blacklist/{id}/add:
+    get:
+      tags: [ User ]
+      description: Adds the user identified by id to the blacklist of the current user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          description: add user with specified id to blacklist
+      responses:
+        302:
+          description: User added to blacklist, it redirects to the blacklist page
+
+  /blacklist/{id}/remove:
+    get:
+    get:
+      tags: [ User ]
+      description: Removes the user identified by id from the blacklist of the current user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          description: remove user with specified id from blacklist
+      responses:
+        302:
+          description: User removed from blacklist, it redirects to the blacklist page
+  
+  /content_filter:
+    get:
+      tags: [ User ]
+      description: Enable content filter for the current user
+      responses:
+        302:
+          description: Content filter on/off, it redirects to user profile page
+
+
+
+################################# Components #########################################3
 components:
   schemas:
     User:
