@@ -154,7 +154,7 @@
                                                 {{'Unblock' if blocked == True else 'Block'}}
                                             </a></li>
                                             {% if reported == False %}
-                                            <li><a class="dropdown-item" href="{{url_for('home.index')}}">Report</a></li>
+                                            <li><a class="dropdown-item" href="{{url_for('users.report_user', id=user.id)}}">Report</a></li>
                                             {% endif %}
                                         {% endif %}
                                     </ul>

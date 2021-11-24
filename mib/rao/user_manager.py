@@ -220,7 +220,7 @@ class UserManager:
             return response.status_code, message
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+            return 500, 'unexpected error'
 
     @classmethod
     def remove_from_blacklist(cls, other_id: int) -> Tuple[int, str]:
@@ -232,16 +232,31 @@ class UserManager:
             return response.status_code, message
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+            return 500, 'unexpected error'
 
     @classmethod
-    def is_user_blocked(cls, other_id: int) -> bool:
-        endpoint = f"{cls.USERS_ENDPOINT}/blacklist/{current_user.id}/{other_id}"
+    def report_user(cls, other_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.USERS_ENDPOINT}/report/{current_user.id}/{other_id}"
+        try:
+            response = requests.delete(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            message = response.json()['message']
+
+            return response.status_code, message
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return 500, 'unexpected error'
+
+    @classmethod
+    def get_user_status(cls, other_id: int) -> Tuple[bool, bool]:
+        endpoint = f"{cls.USERS_ENDPOINT}/user_status/{current_user.id}/{other_id}"
         try:
 
             response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
-            return response.json()['blocked']
+            json_pl = response.json()
+            return json_pl['blocked'], json_pl['reported']
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return False
+
+
 

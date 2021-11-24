@@ -82,11 +82,13 @@ def user_info(id : int) -> Text:
         flash("User not found!")
         return redirect(url_for('home.index'))
 
+    blocked, reported = UserManager.get_user_status(id)
 
     return render_template(
         "user_info.html", 
         user=response,
-        blocked=UserManager.is_user_blocked(id),
+        blocked=blocked,
+        reported=reported,
     )
 
 @users.route("/profile", methods=["GET"])
@@ -127,6 +129,18 @@ def remove_from_blacklist(id):
     if code in [202, 404]:
         flash(message)
         return redirect(url_for('users.blacklist'))
+    else:
+        flash("Unexpected response from users microservice!")
+        return redirect(url_for('home.index'))
+
+@users.route("/report/<int:id>", methods=['GET'])
+@login_required
+def report_user(id):
+    code, message = UserManager.report_user(id)
+
+    if code in [200, 201, 403, 404]:
+        flash(message)
+        return redirect(url_for('users.user_info', id=id))
     else:
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
