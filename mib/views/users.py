@@ -25,19 +25,18 @@ def create_user():
         form_dict = {
             k : form.data[k] for k in form.data if k not in ["csrf_token", "submit"] and form.data[k] is not None
         }
-        response = UserManager.create_user(form_dict)
+        code, message, user = UserManager.create_user(form_dict)
 
-        if response.status_code == 201:
-            # in this case the request is ok!
-            user = response.json()
-            to_login = User.build_from_json(user["user"])
-            login_user(to_login)
-            return redirect(url_for('home.index', id=to_login.id))
-        elif response.status_code == 200:
-            # user already exists
-            flash('User already exists!')
+        if code in [200, 201]:
+            if code == 201:
+                # in this case the request is ok!
+                to_login = User.build_from_json(user)
+                login_user(to_login)
+            flash(message)
         else:
             flash('Unexpected response from users microservice!')
+
+        return redirect(url_for('home.index'))
 
     return render_template('create_user.html', form=form)
 
@@ -119,15 +118,14 @@ def edit_user_profile() -> Text:
         form_dict = {
             k : form.data[k] for k in form.data if k not in ["csrf_token", "submit"] and form.data[k] is not None
         }
-        response = UserManager.update_user(form_dict, current_user.get_id())
+        code, message = UserManager.update_user(form_dict, current_user.get_id())
 
-        if response.status_code == 404:
-            flash("User not found")
-        elif response.status_code == 200:
-            flash("Insert the correct password")
-            return redirect(url_for(users.edit_user_profile))
-        elif response.status_code == 201:
-            flash("User modified correctly")
+        if code in [200, 201, 400, 404]:
+            flash(message)
+            if code == 200:
+                return redirect(url_for('users.edit_user_profile'))
+        else:
+            flash("Unexpected response from users microservice!")
 
         return redirect(url_for("users.user_info", id=current_user.get_id()))
 
