@@ -1,4 +1,5 @@
 import flask
+from datetime import datetime
 
 filters = flask.Blueprint("filters", __name__)
 
@@ -7,7 +8,7 @@ def datetime_format(value, format="%d/%m/%Y"):
     """
     filter used to properly format date of birth in html templates
     """
-    return value.strftime(format)
+    return datetime.strptime(value, format).strftime("%Y-%m-%d")
 
 
 @filters.app_template_filter()

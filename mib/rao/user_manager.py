@@ -102,7 +102,7 @@ class UserManager:
         return user
 
     @classmethod
-    def create_user( cls, form_data ):
+    def create_user( cls, form_data ) -> Tuple[int, str, User]:
         form_data['birthdate'] = form_data['birthdate'].strftime("%d/%m/%Y")
 
         if "profile_picture" in form_data.keys():
@@ -112,10 +112,7 @@ class UserManager:
 
             path = os.path.join(current_app.config["UPLOAD_FOLDER"], name)
             form_data['profile_picture'] = name
-            print('PIPPO', os.listdir('/static/assets'))
             file.save(path)
-        else:
-            form_data['profile_picture'] = "default.png"
 
         try:
             url = "%s/user" % cls.USERS_ENDPOINT
@@ -124,14 +121,22 @@ class UserManager:
                 json=form_data,
                 timeout=cls.REQUESTS_TIMEOUT_SECONDS
             )
+            code = response.status_code
+            json_pl = response.json()
+            user = None
+            message = json_pl['message']
+            if code == 201:
+                user = json_pl['user']
+
+            return code, message, user
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+            return 500, "Unexpected result from user microservice"
 
         return response
 
     @classmethod
-    def update_user(cls, form_data, id):
+    def update_user(cls, form_data, id) -> Tuple[int, str]:
 
         form_data['birthdate'] = form_data['birthdate'].strftime("%d/%m/%Y")
 
@@ -142,10 +147,7 @@ class UserManager:
 
             path = os.path.join(current_app.config["UPLOAD_FOLDER"], name)
             form_data['profile_picture'] = name
-            print('PIPPO', os.listdir('/static/assets'))
             file.save(path)
-        else:
-            form_data['profile_picture'] = "default.png"
 
         try:
             url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(id))
@@ -153,9 +155,12 @@ class UserManager:
                                     json=form_data,
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
                                     )
+            code = response.status_code
+            message = response.json()['message']
+            return code, message
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+            return 500, "Unexpected reponse from user microservice"
 
         return response
 

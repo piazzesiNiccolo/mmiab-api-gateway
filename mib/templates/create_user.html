@@ -24,18 +24,22 @@
 
          {% if user_data is defined %}
          <script>
+             function injectData(dict) {
+                 for (var key in dict) {
+                     var field = document.getElementById(key);
+                     console.log(field)
+                     if (field != undefined)
+                         if(key == "birthdate") field.value = "{{user_data['extra_data']['birthdate']|datetime_format}}"
+                         else field.value = dict[key];
+                 }
+             }
              window.addEventListener(
                  'load', 
                  function() {
                      var data = {{user_data|tojson}}
                      console.log(data)
-                     for (var key in data) {
-                         var field = document.getElementById(key);
-                         console.log(field)
-                         if (field != undefined)
-                             if(key == 'birthdate') field.value = '{{user_data.birthdate}}'
-                             else field.value = data[key];
-                     }
+                     injectData(data);
+                     injectData(data.extra_data);
                  }
              )
          </script>
