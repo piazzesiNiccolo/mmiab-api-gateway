@@ -187,3 +187,13 @@ def report_user(id):
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
+@users.route("/notifications", methods=['GET'])
+def notifications():
+    code = UserManager.notifications()
+
+    print(code)
+
+    return redirect(url_for('users.user_profile'))
+
+
+

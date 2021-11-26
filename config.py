@@ -23,13 +23,13 @@ class Config(object):
     # users microservice
     USERS_MS_PROTO = os.getenv('USERS_MS_PROTO', 'http')
     USERS_MS_HOST = os.getenv('USERS_MS_HOST', 'localhost')
-    USERS_MS_PORT = os.getenv('USERS_MS_PORT', 5001)
+    USERS_MS_PORT = os.getenv('USERS_MS_PORT', 5000)
     USERS_MS_URL = '%s://%s:%s' % (USERS_MS_PROTO, USERS_MS_HOST, USERS_MS_PORT)
 
     # notifications
     NOTIFICATIONS_MS_PROTO = os.getenv('NOTIFICATIONS_MS_PROTO', 'http')
     NOTIFICATIONS_MS_HOST = os.getenv('NOTIFICATIONS_MS_HOST', 'localhost')
-    NOTIFICATIONS_MS_PORT = os.getenv('NOTIFICATIONS_MS_PORT', 5002)
+    NOTIFICATIONS_MS_PORT = os.getenv('NOTIFICATIONS_MS_PORT', 5001)
     NOTIFICATIONS_MS_URL = '%s://%s:%s' % (NOTIFICATIONS_MS_PROTO, NOTIFICATIONS_MS_HOST, NOTIFICATIONS_MS_PORT)
 
     # Configuring sessions
