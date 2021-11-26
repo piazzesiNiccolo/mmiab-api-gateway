@@ -1,4 +1,5 @@
 import pytest
+import responses
 from mib import create_app
 
 @pytest.fixture(scope="session", autouse=True)
@@ -9,3 +10,8 @@ def test_client():
     with app.test_client() as client:
         yield client
 
+
+@pytest.fixture
+def mock_resps():
+    with responses.RequestsMock() as resps:
+        yield resps

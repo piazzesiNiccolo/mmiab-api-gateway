@@ -20,7 +20,6 @@ def create_app():
     global login
 
     app = Flask(__name__, instance_relative_config=True)
-
     flask_env = os.getenv('FLASK_ENV', 'None')
     if flask_env == 'development':
         config_object = 'config.DevConfig'

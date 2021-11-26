@@ -14,7 +14,9 @@ from uuid import uuid4
 from werkzeug.utils import secure_filename
 
 class UserManager:
+    
     USERS_ENDPOINT = app.config['USERS_MS_URL']
+    
     REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
@@ -133,7 +135,6 @@ class UserManager:
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected result from user microservice"
 
-        return response
 
     @classmethod
     def update_user(cls, form_data, id) -> Tuple[int, str]:
