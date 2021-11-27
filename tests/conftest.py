@@ -1,4 +1,5 @@
 import pytest
+import responses
 from mib import create_app
 
 @pytest.fixture(scope="session", autouse=True)
@@ -8,4 +9,5 @@ def test_client():
     ctx.push()
     with app.test_client() as client:
         yield client
+
 

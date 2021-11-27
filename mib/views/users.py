@@ -77,7 +77,7 @@ def set_content_filter():
 @login_required
 def users_list():
     _q = request.args.get("q", None)
-    users, code = UserManager.get_users_list(_q)
+    users, code = UserManager.get_users_list(id=current_user.id, query=_q)
 
     if code != 200:
         flash("Unexpected response from users microservice!")

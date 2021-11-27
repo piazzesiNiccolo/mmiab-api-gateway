@@ -1,5 +1,5 @@
 import os
-
+from config import Config
 from werkzeug.wrappers import response
 from mib.auth.user import User
 from mib import app
@@ -14,14 +14,15 @@ from uuid import uuid4
 from werkzeug.utils import secure_filename
 
 class UserManager:
-    USERS_ENDPOINT = app.config['USERS_MS_URL']
-    REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
-
+    
+    USERS_ENDPOINT = Config.USERS_MS_URL
+    REQUESTS_TIMEOUT_SECONDS = Config.REQUESTS_TIMEOUT_SECONDS
+    
     @classmethod
-    def get_users_list(cls, query: str, blacklist: bool = False) -> Tuple[List[User], int]:
+    def get_users_list(cls,id: int, query: str, blacklist: bool = False) -> Tuple[List[User], int]:
 
         target = "blacklist" if blacklist else "users_list"
-        endpoint = f"{cls.USERS_ENDPOINT}/{target}/{current_user.id}?q={query}"
+        endpoint = f"{cls.USERS_ENDPOINT}/{target}/{id}?q={query}"
 
         try:
             response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
@@ -133,7 +134,6 @@ class UserManager:
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected result from user microservice"
 
-        return response
 
     @classmethod
     def update_user(cls, form_data, id) -> Tuple[int, str]:
