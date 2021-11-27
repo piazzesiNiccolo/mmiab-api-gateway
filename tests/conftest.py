@@ -11,7 +11,3 @@ def test_client():
         yield client
 
 
-@pytest.fixture
-def mock_resps():
-    with responses.RequestsMock() as resps:
-        yield resps
