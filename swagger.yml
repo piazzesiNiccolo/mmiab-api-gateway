@@ -64,6 +64,23 @@ paths:
         302:
           description: Redirects to the homepage
 
+###################### Messages ###########################
+
+  /read_message/{id_mess}:
+    get:
+      tags: [ Message ]
+      summary: Let an user read the selected message
+      parameters:
+      - name: id_mess
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 
+
 ###################### Users ###########################
 
   /user/{id}:
