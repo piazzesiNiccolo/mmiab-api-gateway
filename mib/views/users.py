@@ -77,20 +77,24 @@ def set_content_filter():
 @login_required
 def users_list():
     _q = request.args.get("q", None)
-    users, code = UserManager.get_users_list(id=current_user.id, query=_q)
+    users, propics, code = UserManager.get_users_list(id=current_user.id, query=_q)
 
     if code != 200:
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
-    return render_template("users_list.html", list=users)
+    return render_template(
+        "users_list.html", 
+        list=users,
+        propics=propics,
+    )
 
 @users.route("/user/<int:id>", methods=["GET"])
 @login_required
 def user_info(id : int) -> Text:
-    response = UserManager.get_user_by_id(id)
+    user, propic = UserManager.get_user_by_id(id, cache_propic=current_user.id == id)
 
-    if response == None:
+    if user == None:
         flash("User not found!")
         return redirect(url_for('home.index'))
 
@@ -98,7 +102,8 @@ def user_info(id : int) -> Text:
 
     return render_template(
         "user_info.html", 
-        user=response,
+        user=user,
+        propic=propic,
         blocked=blocked,
         reported=reported,
     )
@@ -129,27 +134,37 @@ def edit_user_profile() -> Text:
 
         return redirect(url_for("users.user_info", id=current_user.get_id()))
 
-    response = UserManager.get_user_by_id(current_user.get_id())
-    return render_template("create_user.html", form=form, user_data=response.__dict__)
+    user, propic = UserManager.get_user_by_id(current_user.get_id())
+    return render_template(
+        "create_user.html", 
+        form=form, 
+        user_data=user.__dict__,
+        propic=propic)
 
 
 @users.route("/profile", methods=["GET"])
 @login_required
 def user_profile() -> Text:
     
+    print(current_user.pippo)
     return redirect(url_for("users.user_info", id=current_user.get_id()))
 
 @users.route("/blacklist", methods=['GET'])
 @login_required
 def blacklist():
     _q = request.args.get("q", None)
-    blacklist, code = UserManager.get_users_list(_q, blacklist=True)
+    blacklist, propics, code = UserManager.get_users_list(current_user.id, _q, blacklist=True)
 
     if code != 200:
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
-    return render_template("users_list.html", list=blacklist, blacklist=True)
+    return render_template(
+        "users_list.html", 
+        list=blacklist, 
+        propics=propics,
+        blacklist=True,
+    )
 
 @users.route("/blacklist/<int:id>/add", methods=['GET'])
 @login_required
@@ -168,7 +183,7 @@ def add_to_blacklist(id):
 def remove_from_blacklist(id):
     code, message = UserManager.remove_from_blacklist(id)
 
-    if code in [202, 404]:
+    if code in [200, 404]:
         flash(message)
         return redirect(url_for('users.blacklist'))
     else:

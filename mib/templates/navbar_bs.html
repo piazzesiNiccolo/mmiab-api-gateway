@@ -58,9 +58,9 @@
                     <button type="button" class="btn btn-outline-info">
                         <div class="rounded-circle d-flex justify-content-center" style="width: 40px; height: 40px; overflow: hidden;">
                             <a class="text-decoration-none" href="{{url_for('home.index', id=current_user.id)}}">
-                                <!--<img 
-                                    src="{#url_for('static',filename='assets/' + (current_user.pfp_path if current_user.pfp_path is not none else 'default.jpg'))#}"
-                                    height="40px">-->
+                                <img 
+                                    src="{{'/static/assets/' + (current_user.pfp_path if current_user.pfp_path is not none else 'default.jpg')}}"
+                                    height="40px">
                             </a>
                         </div>
                     </button>

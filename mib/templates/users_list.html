@@ -88,20 +88,21 @@
                 <div class="row g-2">
                     {% for user in list %}
                     <div class="col-12 col-lg-6 col-xxl-4">
-                        <div class="rounded clearfix py-3 bg-primary text-white">
-                            <div class="container-fluid overflow-hidden">
-                                <div class="row align-items-stretch" style="margin-right: 8px;">
-                                    <div class="col-3 py-2 d-flex justify-content-center">
+                        <div class="rounded clearfix py-3 bg-primary text-white h-100">
+                            <div class="container-fluid overflow-hidden h-100">
+                                <div class="row align-items-stretch h-100" style="margin-right: 8px;">
+                                    <div class="col-3 py-2 d-flex justify-content-center h-100">
                                         <div class="rounded-circle d-flex justify-content-center" style="width: 80px; height: 80px; overflow: hidden;">
                                             <a class="text-decoration-none" href="{{url_for('home.index', id=user.id)}}">
-                                                <!--<img 
-                                                    src="{#url_for('static',filename='assets/' + (user.pfp_path if user.pfp_path is not none else 'default.jpg'))#}"
+                                                {% set propic = propics[loop.index0] %}
+                                                <img 
+                                                    src="data:image/{{ propic['type'] }};base64,{{ propic['data'] | safe }}"
                                                     height="80px">-->
                                             </a>
                                         </div>
                                     </div>
-                                    <div class="col-8 d-flex align-items-center">
-                                        <div class="vstack justify-content-center">
+                                    <div class="col-8 d-flex align-items-center h-100">
+                                        <div class="vstack justify-content-center h-100">
                                             <div class="hstack py-1" style="flex-wrap: wrap;">
                                                 <span class="badge bg-success">Name: </span>
                                                 <span class="mx-3 text-truncate">

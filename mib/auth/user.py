@@ -33,6 +33,7 @@ class User(UserMixin):
         self.authenticated = kw["authenticated"]
         self.is_anonymous = kw["is_anonymous"]
         self.extra_data = kw['extra']
+        self.pippo = 'test'
 
     def get_id(self):
         return self.id

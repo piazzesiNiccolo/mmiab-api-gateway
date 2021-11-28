@@ -1,8 +1,7 @@
 import os
+import base64
 from config import Config
-from werkzeug.wrappers import response
 from mib.auth.user import User
-from mib import app
 from flask_login import logout_user
 from flask_login import current_user
 from flask import abort
@@ -12,6 +11,7 @@ from typing import List
 from typing import Tuple
 from uuid import uuid4
 from werkzeug.utils import secure_filename
+from mib.rao.utils import Utils
 
 class UserManager:
     
@@ -28,13 +28,14 @@ class UserManager:
             response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
 
             users = [ User.build_from_json(u) for u in response.json()['users'] ]
-            return users, response.status_code
+            propics = response.json()['profile_pictures']
+            return users, propics, response.status_code
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
     @classmethod
-    def get_user_by_id(cls, user_id: int) -> User:
+    def get_user_by_id(cls, user_id: int, cache_propic=False) -> User:
         """
         This method contacts the users microservice
         and retrieves the user object by user id.
@@ -47,16 +48,19 @@ class UserManager:
             json_payload = response.json()
             if response.status_code == 200:
                 # user is authenticated
-                user = User.build_from_json(json_payload)
+                user = User.build_from_json(json_payload['user'])
+                propic = json_payload['profile_picture'] 
+                if cache_propic:
+                    Utils.save_profile_picture(propic)
             elif response.status_code == 404:
-                user = None
+                user, propic = None, ''
             else:
                 raise RuntimeError('Server has sent an unrecognized status code %s' % response.status_code)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
-        return user
+        return user, propic
 
     @classmethod
     def get_user_by_email(cls, user_email: str):
@@ -70,15 +74,16 @@ class UserManager:
             response = requests.get("%s/user_email/%s" % (cls.USERS_ENDPOINT, user_email),
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             json_payload = response.json()
-            user = None
+            user, propic = None, ''
 
             if response.status_code == 200:
-                user = User.build_from_json(json_payload)
+                user = User.build_from_json(json_payload['user'])
+                propic = json_payload['profile_picture'] 
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
-        return user
+        return user, propic
 
     @classmethod
     def get_user_by_phone(cls, user_phone: str) -> User:
@@ -92,28 +97,32 @@ class UserManager:
             response = requests.get("%s/user_phone/%s" % (cls.USERS_ENDPOINT, user_phone),
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             json_payload = response.json()
-            user = None
+            user, propic = None, ''
 
             if response.status_code == 200:
-                user = User.build_from_json(json_payload)
+                user = User.build_from_json(json_payload['user'])
+                propic = json_payload['profile_picture'] 
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
-        return user
+        return user, propic
 
     @classmethod
     def create_user( cls, form_data ) -> Tuple[int, str, User]:
         form_data['birthdate'] = form_data['birthdate'].strftime("%d/%m/%Y")
 
+        print('keys', form_data.keys())
         if "profile_picture" in form_data.keys():
             file = form_data["profile_picture"]
-            name = file.filename
-            name = str(uuid4()) + secure_filename(name)
+            b64_file = base64.b64encode(file.read()).decode("utf8")
 
-            path = os.path.join(current_app.config["UPLOAD_FOLDER"], name)
-            form_data['profile_picture'] = name
-            file.save(path)
+            form_data['profile_picture'] = {
+                'name': file.filename,
+                'data': b64_file,
+            }
+        else:
+            form_data['profile_picture'] = ''
 
         try:
             url = "%s/user" % cls.USERS_ENDPOINT
@@ -128,11 +137,12 @@ class UserManager:
             message = json_pl['message']
             if code == 201:
                 user = json_pl['user']
+                Utils.save_profile_picture(json_pl['profile_picture'])
 
             return code, message, user
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected result from user microservice"
+            return 500, "Unexpected result from user microservice", None
 
 
     @classmethod
@@ -142,12 +152,12 @@ class UserManager:
 
         if "profile_picture" in form_data.keys():
             file = form_data["profile_picture"]
-            name = file.filename
-            name = str(uuid4()) + secure_filename(name)
+            b64_file = base64.b64encode(file.read()).decode("utf8")
 
-            path = os.path.join(current_app.config["UPLOAD_FOLDER"], name)
-            form_data['profile_picture'] = name
-            file.save(path)
+            form_data['profile_picture'] = {
+                'name': file.filename,
+                'data': b64_file,
+            }
 
         try:
             url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(id))
@@ -157,12 +167,13 @@ class UserManager:
                                     )
             code = response.status_code
             message = response.json()['message']
+            print('response', response.json())
+            Utils.save_profile_picture(response.json()['profile_picture'])
             return code, message
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected reponse from user microservice"
 
-        return response
 
     @classmethod
     def delete_user(cls, user_id: int):
@@ -212,6 +223,8 @@ class UserManager:
                                      )
             print('received response....')
             json_response = response.json()
+            Utils.save_profile_picture(json_response['profile_picture'])
+
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             # We can't connect to Users MS
             return abort(500)
