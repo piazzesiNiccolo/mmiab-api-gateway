@@ -79,7 +79,10 @@ paths:
           type: integer
       responses:
         200:
-          description: 
+          description: Renders the messages previousy selected
+        404:
+          description: Message not found
+          
 
 ###################### Users ###########################
 

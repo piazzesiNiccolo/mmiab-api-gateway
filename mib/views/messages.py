@@ -19,10 +19,10 @@ def read_messages(id):
     """
 
     response = MessageManager.read_message(id)
-    if response.status_code != 202:
+    if response.status_code != 200:
         flash("Error while retraiving the message")
-        ####return redirect(url_for('auth.profile', id=id))
+        #check return
+        #return redirect(url_for('mai'))
         #return mailbox 
-        
-    return redirect(url_for('home.index'))
-    #return selected message
+    
+    return render_template('read_message.html', message=response)
