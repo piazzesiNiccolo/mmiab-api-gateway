@@ -15,6 +15,21 @@ def mock_get():
         yield _mock
 
 @pytest.fixture(scope='session')
+def mock_post():
+    with mock.patch('requests.post') as _mock:
+        yield _mock
+
+@pytest.fixture(scope='session')
+def mock_put():
+    with mock.patch('requests.put') as _mock:
+        yield _mock
+
+@pytest.fixture(scope='session')
+def mock_del():
+    with mock.patch('requests.delete') as _mock:
+        yield _mock
+
+@pytest.fixture(scope='session')
 def mock_user_bfj():
     with mock.patch('mib.auth.user.User.build_from_json', new=lambda e: e) as _mock:
         yield _mock
