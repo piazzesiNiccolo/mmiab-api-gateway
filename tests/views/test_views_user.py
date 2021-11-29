@@ -57,7 +57,7 @@ class TestViewsUsers:
         (200, "Content filter value successfully changed!")
     ])
     def test_content_filter(self, test_client,code,message, mock_current_user):
-        with mock.patch("mib.rao.user_manager.UserManager._content_filter") as m:
+        with mock.patch("mib.rao.user_manager.UserManager.toggle_content_filter") as m:
             m.return_value = MockResponse(code=code, json={})
             resp = test_client.get("/content_filter")
             assert message in flask.get_flashed_messages()

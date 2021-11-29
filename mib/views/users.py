@@ -64,7 +64,7 @@ def delete_user(id):
 @login_required
 def set_content_filter():
 
-    response = UserManager._content_filter(current_user.id)
+    response = UserManager.toggle_content_filter(current_user.id)
     if response.status_code != 200:
         flash("Error to set content filter")
         return redirect(url_for('users.user_info', id=current_user.id))

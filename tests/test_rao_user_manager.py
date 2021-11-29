@@ -112,7 +112,7 @@ class TestUserManager:
     ])
     def test_create_user(self, mock_post, data, propic, code, message):
         mock_post.reset_mock(side_effect=True)
-        mock_post.return_value = MockRespose(
+        mock_post.return_value = MockResponse(
             code=code, 
             json={ 'user': data, 'profile_picture': '', 'message': message}
         )
@@ -153,7 +153,7 @@ class TestUserManager:
     ])
     def test_update_user(self, mock_put, data, propic, code, message):
         mock_put.reset_mock(side_effect=True)
-        mock_put.return_value = MockRespose(
+        mock_put.return_value = MockResponse(
             code=code, 
             json={ 'user': data, 'profile_picture': '', 'message': message}
         )
@@ -200,7 +200,7 @@ class TestUserManager:
     ])
     def test_content_filter(self, mock_get, code, message):
         mock_get.reset_mock(side_effect=True)
-        mock_get.return_value = MockRespose(
+        mock_get.return_value = MockResponse(
             code=code, 
             json={ 'message': message }
         )
@@ -224,7 +224,7 @@ class TestUserManager:
     ])
     def test_authenticate_user(self, mock_post, args, code, user):
         mock_post.reset_mock(side_effect=True)
-        mock_post.return_value = MockRespose(
+        mock_post.return_value = MockResponse(
             code=code, 
             json={ 'user': user, 'profile_picture': '', 'error_message': '' }
         )
@@ -254,7 +254,7 @@ class TestUserManager:
     ])
     def test_blacklist_add(self, mock_put, args, code, message):
         mock_put.reset_mock(side_effect=True)
-        mock_put.return_value = MockRespose(
+        mock_put.return_value = MockResponse(
             code=code, 
             json={ 'message': message }
         )
@@ -279,7 +279,7 @@ class TestUserManager:
     ])
     def test_blacklist_remove(self, mock_del, args, code, message):
         mock_del.reset_mock(side_effect=True)
-        mock_del.return_value = MockRespose(
+        mock_del.return_value = MockResponse(
             code=code, 
             json={ 'message': message }
         )
@@ -306,7 +306,7 @@ class TestUserManager:
     ])
     def test_report_user(self, mock_put, args, code, message):
         mock_put.reset_mock(side_effect=True)
-        mock_put.return_value = MockRespose(
+        mock_put.return_value = MockResponse(
             code=code, 
             json={ 'message': message }
         )
@@ -333,7 +333,7 @@ class TestUserManager:
     ])
     def test_user_status(self, mock_get, reported, blocked):
         mock_get.reset_mock(side_effect=True)
-        mock_get.return_value = MockRespose(
+        mock_get.return_value = MockResponse(
             code=200, 
             json={ 'reported': reported, 'blocked': blocked }
         )
