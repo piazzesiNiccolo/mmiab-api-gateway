@@ -45,7 +45,7 @@ class MessageManager:
             url = "%s/message/list/sent/%s" % (cls.users_endpoint(),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
-            obj = response.json()['list_of_messages']
+            obj = response.json()['messages']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 

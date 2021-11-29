@@ -36,13 +36,18 @@ def mailbox_list_sent():
     """
     message_list = []
     if current_user.is_authenticated:
-        message_list = MessageManager.get_sended_message_by_id_user(
-            current_user.id
-        )
+        code, obj = MessageManager.get_sended_message_by_id_user(current_user.id)
+    
+    if code != 200:
+        flash("Error while retriving the message")
+        #TODO check return in case of failure
+        #return redirect(url_for('mai'))
+        #return mailbox
+
 
     return render_template(
         "mailbox.html",
-        message_list=message_list,
+        message_list=obj,
         list_type="sent",
         withdraw=current_user.lottery_points > 0,
     )
