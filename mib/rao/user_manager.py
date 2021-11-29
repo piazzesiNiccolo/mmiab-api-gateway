@@ -1,22 +1,20 @@
-import os
 import base64
 from config import Config
 from mib.auth.user import User
 from flask_login import logout_user
 from flask_login import current_user
 from flask import abort
-from flask.globals import current_app
+#from flask import current_app as app
+from mib import app
 import requests
 from typing import List
 from typing import Tuple
-from uuid import uuid4
-from werkzeug.utils import secure_filename
 from mib.rao.utils import Utils
 
 class UserManager:
     
-    USERS_ENDPOINT = Config.USERS_MS_URL
-    REQUESTS_TIMEOUT_SECONDS = Config.REQUESTS_TIMEOUT_SECONDS
+    USERS_ENDPOINT = app.config['USERS_MS_URL']
+    REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
     
     @classmethod
     def get_users_list(cls,id: int, query: str, blacklist: bool = False) -> Tuple[List[User], int]:
@@ -32,7 +30,7 @@ class UserManager:
             return users, propics, response.status_code
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+            return [], [], 500
 
     @classmethod
     def get_user_by_id(cls, user_id: int, cache_propic=False) -> User:

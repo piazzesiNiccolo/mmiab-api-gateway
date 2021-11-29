@@ -80,7 +80,10 @@ def users_list():
     users, propics, code = UserManager.get_users_list(id=current_user.id, query=_q)
 
     if code != 200:
-        flash("Unexpected response from users microservice!")
+        if code == 404:
+            flash("User not found")
+        elif code == 500:
+            flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
     return render_template(
@@ -156,8 +159,12 @@ def blacklist():
     blacklist, propics, code = UserManager.get_users_list(current_user.id, _q, blacklist=True)
 
     if code != 200:
-        flash("Unexpected response from users microservice!")
+        if code == 404:
+            flash("User not found")
+        elif code == 500:
+            flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
+
 
     return render_template(
         "users_list.html", 
