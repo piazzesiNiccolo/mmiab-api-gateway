@@ -64,7 +64,7 @@ def delete_user(id):
 @login_required
 def set_content_filter():
 
-    response = UserManager._content_filter(current_user.id)
+    response = UserManager.toggle_content_filter(current_user.id)
     if response.status_code != 200:
         flash("Error to set content filter")
         return redirect(url_for('users.user_info', id=current_user.id))
@@ -101,7 +101,7 @@ def user_info(id : int) -> Text:
         flash("User not found!")
         return redirect(url_for('home.index'))
 
-    blocked, reported = UserManager.get_user_status(id)
+    blocked, reported = UserManager.get_user_status(current_user.id, id)
 
     return render_template(
         "user_info.html", 
@@ -175,7 +175,7 @@ def blacklist():
 @users.route("/blacklist/<int:id>/add", methods=['GET'])
 @login_required
 def add_to_blacklist(id):
-    code, message = UserManager.add_to_blacklist(id)
+    code, message = UserManager.add_to_blacklist(current_user.id, id)
 
     if code in [201, 403, 404]:
         flash(message)
@@ -187,7 +187,7 @@ def add_to_blacklist(id):
 @users.route("/blacklist/<int:id>/remove", methods=['GET'])
 @login_required
 def remove_from_blacklist(id):
-    code, message = UserManager.remove_from_blacklist(id)
+    code, message = UserManager.remove_from_blacklist(current_user.id, id)
 
     if code in [200, 404]:
         flash(message)
@@ -199,7 +199,7 @@ def remove_from_blacklist(id):
 @users.route("/report/<int:id>", methods=['GET'])
 @login_required
 def report_user(id):
-    code, message = UserManager.report_user(id)
+    code, message = UserManager.report_user(current_user.id, id)
 
     if code in [200, 201, 403, 404]:
         flash(message)
@@ -207,14 +207,6 @@ def report_user(id):
     else:
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
-
-@users.route("/notifications", methods=['GET'])
-def notifications():
-    code = UserManager.notifications()
-
-    print(code)
-
-    return redirect(url_for('users.user_profile'))
 
 
 

@@ -11,7 +11,6 @@ from mib.rao.utils import Utils
 
 class UserManager:
     
-
     @classmethod
     def users_endpoint(cls):
         return app.config['USERS_MS_URL']
@@ -151,6 +150,7 @@ class UserManager:
             message = json_pl['message']
             if code == 201:
                 user = json_pl['user']
+                print('user', json_pl)
                 Utils.save_profile_picture(json_pl['profile_picture'])
 
             return code, message, user
@@ -181,12 +181,12 @@ class UserManager:
                                     )
             code = response.status_code
             message = response.json()['message']
-            print('response', response.json())
-            Utils.save_profile_picture(response.json()['profile_picture'])
+            if code == 201:
+                Utils.save_profile_picture(response.json()['profile_picture'])
             return code, message
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected reponse from user microservice"
+            return 500, "Unexpected response from user microservice"
 
 
     @classmethod
@@ -208,7 +208,7 @@ class UserManager:
         return response
 
     @classmethod
-    def _content_filter(cls, user_id: int) : 
+    def toggle_content_filter(cls, user_id: int) : 
 
         try:
             url = "%s/content_filter/%s" % (cls.users_endpoint(), str(user_id))
@@ -237,7 +237,6 @@ class UserManager:
                                      )
             print('received response....')
             json_response = response.json()
-            Utils.save_profile_picture(json_response['profile_picture'])
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             # We can't connect to Users MS
@@ -247,6 +246,7 @@ class UserManager:
             # user is not authenticated
             return None
         elif response.status_code == 200:
+            Utils.save_profile_picture(json_response['profile_picture'])
             user = User.build_from_json(json_response['user'])
             return user
         else:
@@ -256,8 +256,8 @@ class UserManager:
             )
 
     @classmethod
-    def add_to_blacklist(cls, other_id: int) -> Tuple[int, str]:
-        endpoint = f"{cls.users_endpoint()}/blacklist/{current_user.id}/{other_id}"
+    def add_to_blacklist(cls, user_id: int, other_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.users_endpoint()}/blacklist/{user_id}/{other_id}"
         try:
             response = requests.put(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()['message']
@@ -268,8 +268,8 @@ class UserManager:
             return 500, 'unexpected error'
 
     @classmethod
-    def remove_from_blacklist(cls, other_id: int) -> Tuple[int, str]:
-        endpoint = f"{cls.users_endpoint()}/blacklist/{current_user.id}/{other_id}"
+    def remove_from_blacklist(cls, user_id: int, other_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.users_endpoint()}/blacklist/{user_id}/{other_id}"
         try:
             response = requests.delete(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()['message']
@@ -280,8 +280,8 @@ class UserManager:
             return 500, 'unexpected error'
 
     @classmethod
-    def report_user(cls, other_id: int) -> Tuple[int, str]:
-        endpoint = f"{cls.users_endpoint()}/report/{current_user.id}/{other_id}"
+    def report_user(cls, user_id: int, other_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.users_endpoint()}/report/{user_id}/{other_id}"
         try:
             response = requests.put(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()['message']
@@ -292,8 +292,8 @@ class UserManager:
             return 500, 'unexpected error'
 
     @classmethod
-    def get_user_status(cls, other_id: int) -> Tuple[bool, bool]:
-        endpoint = f"{cls.users_endpoint()}/user_status/{current_user.id}/{other_id}"
+    def get_user_status(cls, user_id: int, other_id: int) -> Tuple[bool, bool]:
+        endpoint = f"{cls.users_endpoint()}/user_status/{user_id}/{other_id}"
         try:
 
             response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
@@ -301,7 +301,7 @@ class UserManager:
             return json_pl['blocked'], json_pl['reported']
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return False
+            return False, False
 
 
 
