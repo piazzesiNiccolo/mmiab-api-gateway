@@ -2,16 +2,10 @@ import mock
 import pytest
 import requests
 from werkzeug.exceptions import InternalServerError
-
+from testing.fake_response import MockResponse
 from mib.rao.user_manager import UserManager
 
-class MockRespose:
-    def __init__(self, code=200, json={}):
-        self.status_code = code
-        self.json_data = json
 
-    def json(self):
-        return self.json_data
 
 
 class TestUserManager:
@@ -23,7 +17,7 @@ class TestUserManager:
         ([], [], 404, True),
     ])
     def test_get_user_list(self, mock_get, mock_user_bfj, users, propics, code, bl):
-        mock_get.return_value = MockRespose(
+        mock_get.return_value = MockResponse(
             code=code, 
             json={ 'users': users, 'profile_pictures': propics, }
         )
@@ -60,7 +54,7 @@ class TestUserManager:
     ])
     def test_get_user_by(self, mock_get, mock_user_bfj, function, par, user, propic, code, cache):
         mock_get.reset_mock(side_effect=True)
-        mock_get.return_value = MockRespose(
+        mock_get.return_value = MockResponse(
             code=code, 
             json={ 'user': user, 'profile_picture': propic, }
         )
@@ -76,7 +70,7 @@ class TestUserManager:
     ])
     def test_get_user_by_id_unexptected(self, mock_get, mock_user_bfj, function, par):
         mock_get.reset_mock(side_effect=True)
-        mock_get.return_value = MockRespose(
+        mock_get.return_value = MockResponse(
             code=403, 
             json={ 'user': None, 'profile_picture': '', }
         )
