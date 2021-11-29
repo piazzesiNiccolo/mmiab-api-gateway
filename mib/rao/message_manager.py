@@ -15,17 +15,23 @@ from uuid import uuid4
 
 class MessageManager:
 
-    USERS_ENDPOINT = Config.USERS_MS_URL
-    REQUESTS_TIMEOUT_SECONDS = Config.REQUESTS_TIMEOUT_SECONDS
+    @classmethod
+    def users_endpoint(cls):
+        return app.config['USERS_MS_URL']
+    
+    @classmethod
+    def requests_timeout_seconds(cls):
+        return app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
-    def read_message(cls, id_mess):
+    def read_message(cls, id_mess, id_usr):
         try:
-            url = "%s/read_message/%s" % (cls.USERS_ENDPOINT, str(id_mess))
-            response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
-
+            url = "%s/message/%s/read/%s" % (cls.users_endpoint(), str(id_mess),str(id_usr))
+            response = requests.get(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            obj = response.json()['message']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
-        return response
+        return code, obj
         

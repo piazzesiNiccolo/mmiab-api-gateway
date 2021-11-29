@@ -66,7 +66,7 @@ paths:
 
 ###################### Messages ###########################
 
-  /read_message/{id_mess}:
+  /message/{id_mess}/read/{id_usr}:
     get:
       tags: [ Message ]
       summary: Let an user read the selected message
@@ -77,11 +77,18 @@ paths:
         required: true
         schema:
           type: integer
+      - name: id_usr
+        in: path
+        description: User's unique identifier
+        required: true
+        schema:
+          type: integer
       responses:
         200:
           description: Renders the messages previousy selected
         404:
           description: Message not found
+
           
 
 ###################### Users ###########################

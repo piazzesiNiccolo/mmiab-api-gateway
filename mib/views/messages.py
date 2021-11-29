@@ -10,7 +10,7 @@ from mib.auth.user import User
 messages = Blueprint('messages', __name__)
 
 
-@messages.route("/read_message/<int:id>", methods=["GET"])
+@messages.route("/message/{id}/read", methods=["GET"])
 @login_required
 def read_messages(id):
 
@@ -18,11 +18,11 @@ def read_messages(id):
     Let the user read the selected message
     """
 
-    response = MessageManager.read_message(id)
-    if response.status_code != 200:
-        flash("Error while retraiving the message")
-        #check return
+    code, obj = MessageManager.read_message(id,current_user.id)
+    if code != 200:
+        flash("Error while retriving the message")
+        #TODO check return in case of failure
         #return redirect(url_for('mai'))
         #return mailbox 
     
-    return render_template('read_message.html', message=response)
+    return render_template('read_message.html', message=obj)
