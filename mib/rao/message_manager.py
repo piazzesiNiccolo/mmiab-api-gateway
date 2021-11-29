@@ -34,4 +34,19 @@ class MessageManager:
             return abort(500)
 
         return code, obj
-        
+
+    
+    @classmethod
+    def get_sended_message_by_id_user(cls,id_usr):
+        """
+        Returns the list of sent messages by a specific user.
+        """
+        try:
+            url = "%s/message/list/sent/%s" % (cls.users_endpoint(),str(id_usr))
+            response = requests.get(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            obj = response.json()['list_of_messages']
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return code,obj
