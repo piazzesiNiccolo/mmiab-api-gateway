@@ -1,11 +1,9 @@
 import base64
-from config import Config
 from mib.auth.user import User
 from flask_login import logout_user
 from flask_login import current_user
 from flask import abort
-#from flask import current_app as app
-from mib import app
+from flask import current_app as app
 import requests
 from typing import List
 from typing import Tuple
@@ -13,17 +11,23 @@ from mib.rao.utils import Utils
 
 class UserManager:
     
-    USERS_ENDPOINT = app.config['USERS_MS_URL']
-    REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
+
+    @classmethod
+    def users_endpoint(cls):
+        return app.config['USERS_MS_URL']
     
     @classmethod
-    def get_users_list(cls,id: int, query: str, blacklist: bool = False) -> Tuple[List[User], int]:
+    def requests_timeout_seconds(cls):
+        return app.config['REQUESTS_TIMEOUT_SECONDS']
+    
+    @classmethod
+    def get_users_list(cls, id: int, query: str, blacklist: bool = False) -> Tuple[List[User], int]:
 
         target = "blacklist" if blacklist else "users_list"
-        endpoint = f"{cls.USERS_ENDPOINT}/{target}/{id}?q={query}"
+        endpoint = f"{cls.users_endpoint()}/{target}/{id}?q={query}"
 
         try:
-            response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
 
             users = [ User.build_from_json(u) for u in response.json()['users'] ]
             propics = response.json()['profile_pictures']
@@ -41,8 +45,8 @@ class UserManager:
         :return: User obj with id=user_id
         """
         try:
-            response = requests.get("%s/user/%s" % (cls.USERS_ENDPOINT, str(user_id)),
-                                    timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get("%s/user/%s" % (cls.users_endpoint(), str(user_id)),
+                                    timeout=cls.requests_timeout_seconds())
             json_payload = response.json()
             if response.status_code == 200:
                 # user is authenticated
@@ -69,8 +73,8 @@ class UserManager:
         :return: User obj with email=user_email
         """
         try:
-            response = requests.get("%s/user_email/%s" % (cls.USERS_ENDPOINT, user_email),
-                                    timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get("%s/user_email/%s" % (cls.users_endpoint(), user_email),
+                                    timeout=cls.requests_timeout_seconds())
             json_payload = response.json()
             user, propic = None, ''
 
@@ -92,8 +96,8 @@ class UserManager:
         :return: User obj with phone=user_phone
         """
         try:
-            response = requests.get("%s/user_phone/%s" % (cls.USERS_ENDPOINT, user_phone),
-                                    timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get("%s/user_phone/%s" % (cls.users_endpoint(), user_phone),
+                                    timeout=cls.requests_timeout_seconds())
             json_payload = response.json()
             user, propic = None, ''
 
@@ -123,11 +127,11 @@ class UserManager:
             form_data['profile_picture'] = ''
 
         try:
-            url = "%s/user" % cls.USERS_ENDPOINT
+            url = "%s/user" % cls.users_endpoint()
             response = requests.post(
                 url,
                 json=form_data,
-                timeout=cls.REQUESTS_TIMEOUT_SECONDS
+                timeout=cls.requests_timeout_seconds()
             )
             code = response.status_code
             json_pl = response.json()
@@ -158,10 +162,10 @@ class UserManager:
             }
 
         try:
-            url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(id))
+            url = "%s/user/%s" % (cls.users_endpoint(), str(id))
             response = requests.put(url,
                                     json=form_data,
-                                    timeout=cls.REQUESTS_TIMEOUT_SECONDS
+                                    timeout=cls.requests_timeout_seconds()
                                     )
             code = response.status_code
             message = response.json()['message']
@@ -183,8 +187,8 @@ class UserManager:
         """
         try:
             logout_user()
-            url = "%s/user/%s" % (cls.USERS_ENDPOINT, str(user_id))
-            response = requests.delete(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            url = "%s/user/%s" % (cls.users_endpoint(), str(user_id))
+            response = requests.delete(url, timeout=cls.requests_timeout_seconds())
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
@@ -195,8 +199,8 @@ class UserManager:
     def _content_filter(cls, user_id: int) : 
 
         try:
-            url = "%s/content_filter/%s" % (cls.USERS_ENDPOINT, str(user_id))
-            response = requests.get(url,timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            url = "%s/content_filter/%s" % (cls.users_endpoint(), str(user_id))
+            response = requests.get(url,timeout=cls.requests_timeout_seconds())
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
@@ -215,9 +219,9 @@ class UserManager:
         payload = dict(email=email, password=password)
         try:
             print('trying response....')
-            response = requests.post('%s/authenticate' % cls.USERS_ENDPOINT,
+            response = requests.post('%s/authenticate' % cls.users_endpoint(),
                                      json=payload,
-                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
+                                     timeout=cls.requests_timeout_seconds()
                                      )
             print('received response....')
             json_response = response.json()
@@ -241,9 +245,9 @@ class UserManager:
 
     @classmethod
     def add_to_blacklist(cls, other_id: int) -> Tuple[int, str]:
-        endpoint = f"{cls.USERS_ENDPOINT}/blacklist/{current_user.id}/{other_id}"
+        endpoint = f"{cls.users_endpoint()}/blacklist/{current_user.id}/{other_id}"
         try:
-            response = requests.put(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.put(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()['message']
 
             return response.status_code, message
@@ -253,9 +257,9 @@ class UserManager:
 
     @classmethod
     def remove_from_blacklist(cls, other_id: int) -> Tuple[int, str]:
-        endpoint = f"{cls.USERS_ENDPOINT}/blacklist/{current_user.id}/{other_id}"
+        endpoint = f"{cls.users_endpoint()}/blacklist/{current_user.id}/{other_id}"
         try:
-            response = requests.delete(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.delete(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()['message']
 
             return response.status_code, message
@@ -265,9 +269,9 @@ class UserManager:
 
     @classmethod
     def report_user(cls, other_id: int) -> Tuple[int, str]:
-        endpoint = f"{cls.USERS_ENDPOINT}/report/{current_user.id}/{other_id}"
+        endpoint = f"{cls.users_endpoint()}/report/{current_user.id}/{other_id}"
         try:
-            response = requests.put(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.put(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()['message']
 
             return response.status_code, message
@@ -277,10 +281,10 @@ class UserManager:
 
     @classmethod
     def get_user_status(cls, other_id: int) -> Tuple[bool, bool]:
-        endpoint = f"{cls.USERS_ENDPOINT}/user_status/{current_user.id}/{other_id}"
+        endpoint = f"{cls.users_endpoint()}/user_status/{current_user.id}/{other_id}"
         try:
 
-            response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             json_pl = response.json()
             return json_pl['blocked'], json_pl['reported']
 

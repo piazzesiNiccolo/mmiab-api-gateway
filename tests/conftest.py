@@ -2,7 +2,7 @@ import pytest
 import mock
 from mib import create_app
 
-@pytest.fixture(scope="session", autouse=False)
+@pytest.fixture(scope="session", autouse=True)
 def test_client():
     app = create_app()
     with app.app_context():

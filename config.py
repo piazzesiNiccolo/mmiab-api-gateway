@@ -36,7 +36,7 @@ class Config(object):
     SESSION_TYPE = 'redis'
 
     # secret key
-    SECRET_KEY = os.getenv('APP_SECRET_KEY', b'isreallynotsecretatall')
+    SECRET_KEY = os.getenv('APP_SECRET', b'isreallynotsecretatall')
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     UPLOAD_EXTENSIONS = ["jpg", "jpeg", "png"]
@@ -78,6 +78,6 @@ class ProdConfig(Config):
     DEBUG = False
 
     import os
-    SECRET_KEY = os.getenv('APP_SECRET_KEY', os.urandom(24))
+    SECRET_KEY = os.getenv('APP_SECRET', os.urandom(24))
 
 
