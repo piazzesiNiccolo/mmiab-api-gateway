@@ -47,42 +47,56 @@ class TestUserManager:
         assert _propics == []
         assert _code == 500
 
-    @pytest.mark.parametrize("user, propic, code, cache",[
-        ('u1', 'p1', 200, False),
-        ('u1', 'p1', 200, True),
-        (None, '', 404, False),
+    @pytest.mark.parametrize("function, par, user, propic, code, cache",[
+        (UserManager.get_user_by_id, 1, 'u1', 'p1', 200, False),
+        (UserManager.get_user_by_id, 1, 'u1', 'p1', 200, True),
+        (UserManager.get_user_by_id, 1, None, '', 404, False),
+        (UserManager.get_user_by_email, "email@email.com", 'u1', 'p1', 200, False),
+        (UserManager.get_user_by_email, "email@email.com", 'u1', 'p1', 200, True),
+        (UserManager.get_user_by_email, "email@email.com", None, '', 404, False),
+        (UserManager.get_user_by_phone, "0000000000", 'u1', 'p1', 200, False),
+        (UserManager.get_user_by_phone, "0000000000", 'u1', 'p1', 200, True),
+        (UserManager.get_user_by_phone, "0000000000", None, '', 404, False),
     ])
-    def test_get_user_by_id(self, mock_get, mock_user_bfj, user, propic, code, cache):
+    def test_get_user_by(self, mock_get, mock_user_bfj, function, par, user, propic, code, cache):
         mock_get.reset_mock(side_effect=True)
         mock_get.return_value = MockRespose(
             code=code, 
             json={ 'user': user, 'profile_picture': propic, }
         )
         with mock.patch('mib.rao.utils.Utils.save_profile_picture'):
-            _user, _propic = UserManager.get_user_by_id(1, cache_propic=cache)
+            _user, _propic = function(par, cache_propic=cache)
             assert _user == user
             assert _propic == propic
 
-    def test_get_user_by_id_unexptected(self, mock_get, mock_user_bfj):
+    @pytest.mark.parametrize("function, par",[
+        (UserManager.get_user_by_id, 1),
+        (UserManager.get_user_by_email, "email@email.com"),
+        (UserManager.get_user_by_phone, "0000000000"),
+    ])
+    def test_get_user_by_id_unexptected(self, mock_get, mock_user_bfj, function, par):
         mock_get.reset_mock(side_effect=True)
         mock_get.return_value = MockRespose(
             code=403, 
             json={ 'user': None, 'profile_picture': '', }
         )
-
         with pytest.raises(RuntimeError):
-            UserManager.get_user_by_id(1)
+            function(par)
 
-    @pytest.mark.parametrize("exception",[
-        requests.exceptions.ConnectionError,
-        requests.exceptions.Timeout,
+    @pytest.mark.parametrize("function, par, exception",[
+        (UserManager.get_user_by_id, 1, requests.exceptions.ConnectionError),
+        (UserManager.get_user_by_id, 1,requests.exceptions.Timeout),
+        (UserManager.get_user_by_email, "email@email.com", requests.exceptions.ConnectionError),
+        (UserManager.get_user_by_email, "email@email.com", requests.exceptions.Timeout),
+        (UserManager.get_user_by_phone, "0000000000",requests.exceptions.ConnectionError),
+        (UserManager.get_user_by_phone, "0000000000",requests.exceptions.Timeout),
     ])
-    def test_get_user_by_id_error(self, mock_get, mock_user_bfj, exception):
+    def test_get_user_by_id_error(self, mock_get, mock_user_bfj, function, par, exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
 
         with pytest.raises(InternalServerError):
-            UserManager.get_user_by_id(1)
+            function(par)
 
 
 

@@ -65,7 +65,7 @@ class UserManager:
         return user, propic
 
     @classmethod
-    def get_user_by_email(cls, user_email: str):
+    def get_user_by_email(cls, user_email: str, cache_propic=False):
         """
         This method contacts the users microservice
         and retrieves the user object by user email.
@@ -81,6 +81,12 @@ class UserManager:
             if response.status_code == 200:
                 user = User.build_from_json(json_payload['user'])
                 propic = json_payload['profile_picture'] 
+                if cache_propic:
+                    Utils.save_profile_picture(propic)
+            elif response.status_code == 404:
+                user, propic = None, ''
+            else:
+                raise RuntimeError('Server has sent an unrecognized status code %s' % response.status_code)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
@@ -88,7 +94,7 @@ class UserManager:
         return user, propic
 
     @classmethod
-    def get_user_by_phone(cls, user_phone: str) -> User:
+    def get_user_by_phone(cls, user_phone: str, cache_propic=False) -> User:
         """
         This method contacts the users microservice
         and retrieves the user object by user phone.
@@ -104,6 +110,12 @@ class UserManager:
             if response.status_code == 200:
                 user = User.build_from_json(json_payload['user'])
                 propic = json_payload['profile_picture'] 
+                if cache_propic:
+                    Utils.save_profile_picture(propic)
+            elif response.status_code == 404:
+                user, propic = None, ''
+            else:
+                raise RuntimeError('Server has sent an unrecognized status code %s' % response.status_code)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
