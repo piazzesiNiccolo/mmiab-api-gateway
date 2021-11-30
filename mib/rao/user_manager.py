@@ -203,7 +203,7 @@ class UserManager:
             response = requests.delete(url, timeout=cls.requests_timeout_seconds())
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+              return 500, "Unexpected response from user microservice"
 
         return response
 

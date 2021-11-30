@@ -7,7 +7,6 @@ from werkzeug.exceptions import InternalServerError
 from werkzeug.datastructures import FileStorage
 from testing.fake_response import MockResponse
 from mib.rao.user_manager import UserManager
-
 test_user_create = {
     'first_name': 'Jack',
     'last_name': 'Black',
@@ -178,21 +177,33 @@ class TestUserManager:
         assert code == 500
         assert message == "Unexpected response from user microservice"
 
-    '''
+    
     @pytest.mark.parametrize("code, message",[
         (202, 'user deleted'),
         (404, 'user not found')
     ])
     def test_delete_user(self, mock_del, code, message):
-        with mock.patch('flask_login.utils.logout_user', return_value=True):
+        with mock.patch('mib.rao.user_manager.logout_user', return_value=True):
             mock_del.reset_mock(side_effect=True)
-            mock_del.return_value = MockRespose(
+            mock_del.return_value = MockResponse(
                 code=code, 
                 json={ 'message': message }
             )
             response = UserManager.delete_user(1)
             assert response == mock_del.return_value
-    '''
+    
+    @pytest.mark.parametrize("exception",[
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout
+    ])
+    def test_delete_user_error(self, mock_del, exception ):
+         with mock.patch('mib.rao.user_manager.logout_user', return_value=True):
+            mock_del.side_effect = exception()
+            code, message = UserManager.delete_user(1)
+            assert code == 500
+            assert message == "Unexpected response from user microservice"
+
+    
 
     @pytest.mark.parametrize("code, message",[
         (200, 'content filter toggled'),
