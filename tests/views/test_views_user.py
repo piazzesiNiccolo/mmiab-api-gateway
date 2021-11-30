@@ -141,3 +141,19 @@ class TestViewsUsers:
                 assert blocked_data in resp.data
                 if not reported:
                     assert b"Report" in resp.data
+
+    @pytest.mark.parametrize("code, message", [ 
+        (403, "Users cannot report themselves"),
+        (404, "Reported user not found"),
+        (404, "User not found"),
+        (200, "You have already reported this user"),
+        (201, "User succesfully reported"),
+        (500, "Unexpected response from users microservice!")
+    ])
+    def test_report(self, test_client, mock_current_user, code, message):
+        with mock.patch("mib.rao.user_manager.UserManager.report_user") as m:
+            m.return_value = code, message 
+            resp = test_client.get("/report/1")
+            assert message in get_flashed_messages()
+            assert resp.status_code == 302
+
