@@ -82,7 +82,7 @@ def users_list():
     if code != 200:
         if code == 404:
             flash("User not found")
-        elif code == 500:
+        else:
             flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
