@@ -142,6 +142,9 @@ class TestViewsUsers:
                 if not reported:
                     assert b"Report" in resp.data
 
+    def test_get_current_user_profile(self, test_client,mock_current_user):
+        resp = test_client.get("/profile")
+        assert resp.status_code == 302
     @pytest.mark.parametrize("code, message", [ 
         (403, "Users cannot report themselves"),
         (404, "Reported user not found"),
