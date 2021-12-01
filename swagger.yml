@@ -64,6 +64,48 @@ paths:
         302:
           description: Redirects to the homepage
 
+###################### Messages ###########################
+
+  /message/{id_mess}/read/{id_usr}:
+    get:
+      tags: [ Message ]
+      summary: Let an user read the selected message
+      parameters:
+      - name: id_mess
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      - name: id_usr
+        in: path
+        description: User's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Renders the messages previousy selected
+        404:
+          description: Message not found
+
+  /message/list/sent/{id_usr}:
+    get:
+      tags: [ Message ]
+      summary: Return list 
+      parameters:
+      - name: id_usr
+        in: path
+        description: User's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return list of sent messages
+        401:
+          description: Error on retriving messages
+
 ###################### Users ###########################
 
   /user/{id}:
