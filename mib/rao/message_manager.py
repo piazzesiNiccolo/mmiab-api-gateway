@@ -26,7 +26,7 @@ class MessageManager:
     @classmethod
     def read_message(cls, id_mess, id_usr):
         try:
-            url = "%s/message/%s/read/%s" % (cls.users_endpoint(), str(id_mess),str(id_usr))
+            url = "%s/message/%s/%s" % (cls.users_endpoint(), str(id_mess),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = response.json()['message']
