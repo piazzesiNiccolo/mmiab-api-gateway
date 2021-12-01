@@ -1,4 +1,3 @@
-from _pytest.fixtures import pytest_fixture_setup
 from flask.helpers import get_flashed_messages
 import pytest
 import datetime
@@ -142,21 +141,127 @@ class TestViewsUsers:
                 if not reported:
                     assert b"Report" in resp.data
 
-    def test_get_current_user_profile(self, test_client,mock_current_user):
+    def test_get_current_user_profile(self, test_client, mock_current_user):
         resp = test_client.get("/profile")
         assert resp.status_code == 302
-    @pytest.mark.parametrize("code, message", [ 
-        (403, "Users cannot report themselves"),
-        (404, "Reported user not found"),
-        (404, "User not found"),
-        (200, "You have already reported this user"),
-        (201, "User succesfully reported"),
-        (500, "Unexpected response from users microservice!")
-    ])
-    def test_report(self, test_client, mock_current_user, code, message):
-        with mock.patch("mib.rao.user_manager.UserManager.report_user") as m:
-            m.return_value = code, message 
-            resp = test_client.get("/report/1")
+
+    def test_edit_user_page(self, test_client, mock_current_user):
+        with mock.patch("mib.rao.user_manager.UserManager.get_user_by_id") as m:
+            m.return_value = (
+                User(
+                    id=1,
+                    email="email@email.com",
+                    is_active=True,
+                    authenticated=True,
+                    is_anonymous=False,
+                    extra={"birthdate": "19/02/1998"},
+                ),
+                None,
+            )
+            resp = test_client.get("/profile/edit")
+            assert resp.status_code == 200
+            assert b"submit" in resp.data
+
+    @pytest.mark.parametrize(
+        "code, message",
+        [
+            (200, "Password incorrect"),
+            (201, "User profile successfully updated"),
+            (404, "User not found"),
+            (400, "Phone already used"),
+            (400, "Email already used"),
+            (500, "Unexpected response from users microservice!"),
+        ],
+    )
+    def test_edit_user_valid_form(self, test_client, mock_current_user, code, message):
+        data = {
+            "first_name": "Niccolò",
+            "last_name": "Piazzesi",
+            "email": "email@email.com",
+            "birthdate": "19/02/1998",
+            "password": "Password12",
+            "phone": "1234567890",
+            "nickname": "npiazzesi",
+            "is_active": False,
+        }
+
+        with mock.patch("mib.rao.user_manager.UserManager.update_user") as m:
+            m.return_value = (code, message)
+            resp = test_client.post("/profile/edit", data=data)
+            assert message in flask.get_flashed_messages()
+            assert resp.status_code == 302
+
+    def test_user_blacklist_ok(self, test_client, mock_current_user):
+        with mock.patch("mib.rao.user_manager.UserManager.get_users_list") as m:
+            m.return_value = [], [], 200
+            resp = test_client.get("/blacklist")
+            assert resp.status_code == 200
+            assert b"Users" in resp.data
+
+    @pytest.mark.parametrize(
+        "code, message",
+        [
+            (404, "User not found"),
+            (500, "Unexpected response from users microservice!"),
+        ],
+    )
+    def test_user_blacklist_error(self, test_client, mock_current_user, code, message):
+        with mock.patch("mib.rao.user_manager.UserManager.get_users_list") as m:
+            m.return_value = None, None, code
+            resp = test_client.get("/blacklist?q=keyword")
             assert message in get_flashed_messages()
             assert resp.status_code == 302
 
+    @pytest.mark.parametrize(
+        "code, message",
+        [
+            (200, "User removed blacklist"),
+            (404, "Blocking user not found"),
+            (404, "Blocked user not found"),
+            (500, "Unexpected response from users microservice!"),
+        ],
+    )
+    def test_user_add_to_blacklist(self, test_client, mock_current_user, code, message):
+        with mock.patch("mib.rao.user_manager.UserManager.remove_from_blacklist") as m:
+            m.return_value = code, message
+            resp = test_client.get("/blacklist/1/remove")
+            assert resp.status_code == 302
+            assert message in flask.get_flashed_messages()
+
+    @pytest.mark.parametrize(
+        "code, message",
+        [
+            (201, "User added to blacklist"),
+            (200, "User already in blacklist"),
+            (404, "Blocking user not found"),
+            (404, "Blocked user not found"),
+            (403, "Users cannot block themselves"),
+            (500, "Unexpected response from users microservice!"),
+        ],
+    )
+    def test_user_remove_from_blacklist(
+        self, test_client, mock_current_user, code, message
+    ):
+        with mock.patch("mib.rao.user_manager.UserManager.add_to_blacklist") as m:
+            m.return_value = code, message
+            resp = test_client.get("/blacklist/1/add")
+            assert resp.status_code == 302
+            assert message in flask.get_flashed_messages()
+
+    @pytest.mark.parametrize(
+        "code, message",
+        [
+            (403, "Users cannot report themselves"),
+            (404, "Reported user not found"),
+            (404, "User not found"),
+            (200, "You have already reported this user"),
+            (201, "User succesfully reported"),
+            (500, "Unexpected response from users microservice!"),
+        ],
+    )
+    def test_report(self, test_client, mock_current_user, code, message):
+        with mock.patch("mib.rao.user_manager.UserManager.report_user") as m:
+            m.return_value = code, message
+            resp = test_client.get("/report/1")
+            assert message in get_flashed_messages()
+            assert resp.status_code == 302

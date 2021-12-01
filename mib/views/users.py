@@ -160,7 +160,7 @@ def blacklist():
     if code != 200:
         if code == 404:
             flash("User not found")
-        elif code == 500:
+        else:
             flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
 
@@ -177,7 +177,7 @@ def blacklist():
 def add_to_blacklist(id):
     code, message = UserManager.add_to_blacklist(current_user.id, id)
 
-    if code in [201, 403, 404]:
+    if code in [200, 201, 403, 404]:
         flash(message)
         return redirect(url_for('users.blacklist'))
     else:
