@@ -123,6 +123,23 @@ paths:
         401:
           description: Error on retriving messages
 
+  /message/list/drafted/{id_usr}:
+    get:
+      tags: [ Message ]
+      summary: Return list 
+      parameters:
+      - name: id_usr
+        in: path
+        description: User's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return list of drafted messages
+        401:
+          description: Error on retriving messages
+
 ###################### Users ###########################
 
   /user/{id}:

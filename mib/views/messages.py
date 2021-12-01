@@ -76,3 +76,28 @@ def mailbox_list_received():
         list_type="received",
         withdraw=current_user.lottery_points > 0,
     )
+
+@messages.route("/message/list/draft", methods=["GET"])
+@login_required
+def mailbox_list_drafted():
+    """
+    Displays messages sent by current user
+    :return: sent messages mailbox template
+    """
+    message_list = []
+    if current_user.is_authenticated:
+        code, obj = MessageManager.get_draft_message_by_id_user(current_user.id)
+    
+    if code != 200:
+        flash("Error while retriving the message")
+        #TODO check return in case of failure
+        #return redirect(url_for('mai'))
+        #return mailbox
+
+
+    return render_template(
+        "mailbox.html",
+        message_list=obj,
+        list_type="drafted",
+        withdraw=current_user.lottery_points > 0,
+    )
