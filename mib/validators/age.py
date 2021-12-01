@@ -12,7 +12,7 @@ class AgeValidator(Exception):
         self.min_age = min_age
         self.max_age = max_age
 
-        if type(min_age) != int and type(min_age) != int:
+        if type(min_age) != int or type(max_age) != int:
             raise ValueError('min_age and max_age must be integers!')
 
         if min_age < 0 or max_age < 0:

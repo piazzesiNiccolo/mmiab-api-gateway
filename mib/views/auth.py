@@ -7,7 +7,7 @@ auth = Blueprint('auth', __name__)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
-def login(re=False):
+def login(re=False): # pragma: no cover
     """Allows the user to log into the system
 
     Args:
@@ -38,12 +38,12 @@ def re_login():
     """Method that is being called after the user's session is expired.
 
     """
-    return login(re=True)
+    return login(re=True) # pragma: no cover
 
 
 @auth.route('/logout')
 @login_required
-def logout():
+def logout(): # pragma: no cover
     """This method allows the users to log out of the system
 
     Returns:
