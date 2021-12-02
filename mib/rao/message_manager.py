@@ -69,7 +69,7 @@ class MessageManager:
     @classmethod
     def get_drafted_message_by_id_user(cls,id_usr):
         """
-        Returns the list of sent messages by a specific user.
+        Returns the list of drafted messages by a specific user.
         """
         try:
             url = "%s/message/list/drafted/%s" % (cls.users_endpoint(),str(id_usr))
