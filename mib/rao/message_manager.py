@@ -80,3 +80,16 @@ class MessageManager:
             return abort(500)
 
         return code,obj
+
+    @classmethod
+    def get_timeline_day_mess_sent(cls,id_usr: int, year: int, month: int, day: int):
+
+        try:
+            url = "%s/message/list/sent/%s/%s/%s/%s" % (cls.users_endpoint(),str(id_usr),str(year),str(month),str(day))
+            response = requests.get(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            obj = response.json()['messages']
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return code,obj

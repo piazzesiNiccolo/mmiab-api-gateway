@@ -1,3 +1,5 @@
+import datetime
+from datetime import timedelta
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required)
 from flask_login import current_user
@@ -100,3 +102,21 @@ def mailbox_list_drafted():
         message_list=obj,
         list_type="drafted",
     )
+
+@messages.route("/message/list/sent?y=&m=&d=&", methods=["GET"])
+@login_required
+def timeline_daily_sent():
+
+    year = request.args.get('y',None)
+    month = request.args.get('m',None)
+    day = request.args.get('d',None)
+
+    today_dt = datetime(year, month, day)
+    tomorrow = today_dt + timedelta(days=1)
+    yesterday = today_dt - timedelta(days=1)
+
+    messages = MessageManager.get_timeline_day_mess_send(
+        current_user.id, year, month, day
+    )
+
+
