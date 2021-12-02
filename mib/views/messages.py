@@ -105,18 +105,27 @@ def mailbox_list_drafted():
 
 @messages.route("/message/list/sent?y=&m=&d=&", methods=["GET"])
 @login_required
-def timeline_daily_sent():
+def list_sent_messages():
+    ''''
+    If the user specifies year, month and day, it returns the timeline
+    else if the previous parameters are not specified, it returns the list of sent messages
+        with no filters
+    '''
 
     year = request.args.get('y',None)
     month = request.args.get('m',None)
     day = request.args.get('d',None)
 
-    today_dt = datetime(year, month, day)
-    tomorrow = today_dt + timedelta(days=1)
-    yesterday = today_dt - timedelta(days=1)
+    try:
+        today_dt = datetime(year, month, day)
+    except ValueError:
+        today_dt = None
+        
+    code, obj = MessageManager.get_sended_message_by_id_user(current_user.id, dt=today_dt)
 
-    messages = MessageManager.get_timeline_day_mess_send(
-        current_user.id, year, month, day
-    )
+    tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
+    yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
+
+
 
 

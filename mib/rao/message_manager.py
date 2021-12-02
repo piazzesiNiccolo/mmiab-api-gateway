@@ -35,22 +35,6 @@ class MessageManager:
 
         return code, obj
 
-    
-    @classmethod
-    def get_sended_message_by_id_user(cls,id_usr):
-        """
-        Returns the list of sent messages by a specific user.
-        """
-        try:
-            url = "%s/message/list/sent/%s" % (cls.users_endpoint(),str(id_usr))
-            response = requests.get(url, timeout=cls.requests_timeout_seconds())
-            code = response.status_code
-            obj = response.json()['messages']
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
-
-        return code,obj
-
     @classmethod
     def get_received_message_by_id_user(cls,id_usr):
         """
@@ -89,6 +73,27 @@ class MessageManager:
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = response.json()['messages']
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return code,obj
+
+    @classmethod
+    def get_sended_message_by_id_user(cls,id_usr, data):
+        """
+        Returns the list of sent messages by a specific user.
+        """
+        try:
+            if data is None:
+                url = "%s/message/list/sent/%s" % (cls.users_endpoint(),str(id_usr))
+                response = requests.get(url, timeout=cls.requests_timeout_seconds())
+                code = response.status_code
+                obj = response.json()['messages']
+            else:
+                url = "%s/message/list/sent/%s/%s" % (cls.users_endpoint(),str(id_usr),str(data))
+                response = requests.get(url, timeout=cls.requests_timeout_seconds())
+                code = response.status_code
+                obj = response.json()['messages']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
 
