@@ -25,15 +25,12 @@ class User(UserMixin):
         return User(**kw)
 
     def __init__(self, **kw):
-        if kw is None:
-            raise RuntimeError('You can\'t build the user with none dict')
         self.id = kw["id"]
         self.email = kw["email"]
         self.is_active = kw["is_active"]
         self.authenticated = kw["authenticated"]
         self.is_anonymous = kw["is_anonymous"]
         self.extra_data = kw['extra']
-
     def get_id(self):
         return self.id
 
@@ -43,7 +40,7 @@ class User(UserMixin):
 
     def __getattr__(self, item):
         if item in self.__dict__:
-            return self[item]
+            return self.__dict__[item]
         elif item in self.extra_data:
             return self.extra_data[item]
         else:

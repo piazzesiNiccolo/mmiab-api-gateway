@@ -26,18 +26,18 @@ class UserForm(FlaskForm):
     first_name = f.StringField( 'First Name', validators=[DataRequired()])
     last_name = f.StringField( 'Last Name', validators=[DataRequired()])
     password = f.PasswordField( 'Password', validators=[DataRequired()])
-    birthdate = DateField( 'Birthday', validators=[AgeValidator(min_age=18)])
+    birthdate = DateField( 'Birthday', format="%d/%m/%Y", validators=[AgeValidator(min_age=13)])
     nickname = f.StringField("Nickname", validators=[Optional()])
     location = f.StringField("Location", validators=[Optional()])
     profile_picture = FileField(
         "Profile Picture",
         validators=[
             FileAllowed(
-                app.config['UPLOAD_EXTENSIONS'],
+                ["jpg", "jpeg", "png"],
                 message="You can only upload a jpg,jpeg, or png file",
             ),
             Optional(),
-            FileSize(max_size=app.config['MAX_CONTENT_LENGTH'], message="max size allowed=16 MB"),
+            FileSize(max_size=16*1024*1024, message="max size allowed=16 MB"),
         ],
     )
     phone = TelField( 'Phone', validators=[DataRequired()])
