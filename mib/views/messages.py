@@ -126,6 +126,14 @@ def list_sent_messages():
     tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
     yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
 
+    return render_template(
+        "mailbox.html",
+        message_list=obj,
+        tomorrow=tomorrow,
+        yesterday=yesterday,
+        list_type="drafted",
+    )
+
 
 
 
