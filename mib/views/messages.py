@@ -103,7 +103,7 @@ def mailbox_list_drafted():
         list_type="drafted",
     )
 
-@messages.route("/message/list/sent?y=&m=&d=&", methods=["GET"])
+@messages.route("/message/list/sent", methods=["GET"])
 @login_required
 def list_sent_messages():
     ''''
@@ -125,12 +125,14 @@ def list_sent_messages():
 
     tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
     yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
+    day_view = today_dt is None
 
     return render_template(
         "mailbox.html",
         message_list=obj,
         tomorrow=tomorrow,
         yesterday=yesterday,
+        day_view = not day_view,
         list_type="drafted",
     )
 
