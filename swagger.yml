@@ -100,9 +100,58 @@ paths:
         required: true
         schema:
           type: integer
+      - name: y
+        in: query
+        description: year identifier
+        schema:
+          type: integer
+      - name: m
+        in: query
+        description: month identifier
+        schema:
+          type: integer
+      - name: d
+        in: query
+        description: day identifier
+        schema:
+          type: integer
       responses:
         200:
           description: Return list of sent messages
+        401:
+          description: Error on retriving messages
+
+  /message/list/received/{id_usr}:
+    get:
+      tags: [ Message ]
+      summary: Return list 
+      parameters:
+      - name: id_usr
+        in: path
+        description: User's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return list of received messages
+        401:
+          description: Error on retriving messages
+
+  /message/list/drafted/{id_usr}:
+    get:
+      tags: [ Message ]
+      summary: Return list 
+      parameters:
+      - name: id_usr
+        in: path
+        description: User's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return list of drafted messages
         401:
           description: Error on retriving messages
 
