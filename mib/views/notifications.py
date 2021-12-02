@@ -8,7 +8,6 @@ notifications = Blueprint('notifications', __name__)
 @notifications.route('/notifications', methods=['GET'])
 @login_required
 def get_notifications():
-    code = NotificationManager.get_notifications()
-    print('status_code:', code)
+    NotificationManager.get_notifications()
     return redirect(url_for('users.user_profile'))
 

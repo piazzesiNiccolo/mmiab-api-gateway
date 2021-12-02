@@ -31,6 +31,7 @@ class TestUserManager:
         ([], [], 404, True),
     ])
     def test_get_user_list(self, mock_get, mock_user_bfj, users, propics, code, bl):
+        mock_get.reset_mock(side_effect=True)
         mock_get.return_value = MockResponse(
             code=code, 
             json={ 'users': users, 'profile_pictures': propics, }

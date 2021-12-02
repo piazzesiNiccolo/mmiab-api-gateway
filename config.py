@@ -25,7 +25,11 @@ class Config(object):
     USERS_MS_HOST = os.getenv('USERS_MS_HOST', 'localhost')
     USERS_MS_PORT = os.getenv('USERS_MS_PORT', 5000)
     USERS_MS_URL = '%s://%s:%s' % (USERS_MS_PROTO, USERS_MS_HOST, USERS_MS_PORT)
-
+    # messages
+    MESSAGES_MS_PROTO = os.getenv('MESSAGES_MS_PROTO', 'http')
+    MESSAGES_MS_HOST = os.getenv('MESSAGES_MS_HOST', 'localhost')
+    MESSAGES_MS_PORT = os.getenv('MESSAGES_MS_PORT', 5000)
+    MESSAGES_MS_URL = '%s://%s:%s' % (MESSAGES_MS_PROTO, MESSAGES_MS_HOST, MESSAGES_MS_PORT)
     # notifications
     NOTIFICATIONS_MS_PROTO = os.getenv('NOTIFICATIONS_MS_PROTO', 'http')
     NOTIFICATIONS_MS_HOST = os.getenv('NOTIFICATIONS_MS_HOST', 'localhost')
