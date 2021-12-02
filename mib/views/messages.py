@@ -86,7 +86,7 @@ def mailbox_list_drafted():
     """
     message_list = []
     if current_user.is_authenticated:
-        code, obj = MessageManager.get_draft_message_by_id_user(current_user.id)
+        code, obj = MessageManager.get_drafted_message_by_id_user(current_user.id)
     
     if code != 200:
         flash("Error while retriving the message")
@@ -99,5 +99,4 @@ def mailbox_list_drafted():
         "mailbox.html",
         message_list=obj,
         list_type="drafted",
-        withdraw=current_user.lottery_points > 0,
     )
