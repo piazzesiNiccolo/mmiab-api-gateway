@@ -88,7 +88,8 @@ class MessageManager:
             if data is None:
                 url = "%s/message/list/sent/%s" % (cls.users_endpoint(),str(id_usr))
             else:
-                url = "%s/message/list/sent/%s/%s" % (cls.users_endpoint(),str(id_usr),str(data))
+                data_format = 'y=%d&m=%d&d=%d' % (data.year,data.month,data.day)
+                url = "%s/message/list/sent/%s?%s" % (cls.users_endpoint(),str(id_usr),data_format)
 
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
