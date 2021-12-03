@@ -90,3 +90,29 @@ class MessageManager:
             return 500, "Unexpected response from messages microservice!"
 
         return code,obj
+
+    @classmethod
+    def get_timeline_month_mess_send(cls,id_usr: int, year: int, month: int):
+        try:
+            url = "%s/timeline/list/sent/%s?%s" % (cls.users_endpoint(),str(id_usr),str(year),str(month))
+            response = requests.get(url, timeout=cls.requests_timeout_seconds())
+            print(response.json())
+            code = response.status_code
+            obj = response.json()['messages']
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return 500, "Unexpected response from messages microservice!"
+
+        return code,obj
+
+    @classmethod
+    def get_timeline_month_mess_received(cls,id_usr: int, year: int, month: int):
+        try:
+            url = "%s/timeline/list/received/%s?%s" % (cls.users_endpoint(),str(id_usr),str(year),str(month))
+            response = requests.get(url, timeout=cls.requests_timeout_seconds())
+            print(response.json())
+            code = response.status_code
+            obj = response.json()['messages']
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return 500, "Unexpected response from messages microservice!"
+
+        return code,obj
