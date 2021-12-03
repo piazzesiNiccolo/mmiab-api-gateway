@@ -3,8 +3,14 @@ from mib import app
 from typing import Tuple
 
 class NotificationManager:
-    NOTIFICATIONS_ENDPOINT = app.config['NOTIFICATIONS_MS_URL']
-    REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
+    
+    @classmethod
+    def users_endpoint(cls):
+        return app.config['USERS_MS_URL']
+    
+    @classmethod
+    def requests_timeout_seconds(cls):
+        return app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
     def get_notifications(cls) -> Tuple[int, str]:
