@@ -36,17 +36,22 @@ class MessageManager:
         return code, obj
 
     @classmethod
-    def get_received_message_by_id_user(cls,id_usr):
+    def get_received_message_by_id_user(cls,id_usr:int , data: datetime):
         """
-        Returns the list of sent messages by a specific user.
+        Returns the list of received messages by a specific user.
         """
         try:
-            url = "%s/message/list/received/%s" % (cls.users_endpoint(),str(id_usr))
+            if data is None:
+                url = "%s/message/list/received/%s" % (cls.users_endpoint(),str(id_usr))
+            else:
+                data_format = 'y=%d&m=%d&d=%d' % (data.year,data.month,data.day)
+                url = "%s/message/list/received/%s?%s" % (cls.users_endpoint(),str(id_usr),data_format)
+
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = response.json()['messages']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
+            return 500, "Unexpected response from messages microservice!"
 
         return code,obj
 
