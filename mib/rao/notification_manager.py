@@ -1,12 +1,10 @@
 import requests
-from mib import app
-from typing import Tuple
+from flask import current_app as app
 
 class NotificationManager:
-    
     @classmethod
-    def users_endpoint(cls):
-        return app.config['USERS_MS_URL']
+    def notifications_endpoint(cls):
+        return app.config['NOTIFICATIONS_MS_URL']
     
     @classmethod
     def requests_timeout_seconds(cls):

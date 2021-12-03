@@ -25,18 +25,28 @@ class Config(object):
     USERS_MS_HOST = os.getenv('USERS_MS_HOST', 'localhost')
     USERS_MS_PORT = os.getenv('USERS_MS_PORT', 5000)
     USERS_MS_URL = '%s://%s:%s' % (USERS_MS_PROTO, USERS_MS_HOST, USERS_MS_PORT)
-
+    # messages
+    MESSAGES_MS_PROTO = os.getenv('MESSAGES_MS_PROTO', 'http')
+    MESSAGES_MS_HOST = os.getenv('MESSAGES_MS_HOST', 'localhost')
+    MESSAGES_MS_PORT = os.getenv('MESSAGES_MS_PORT', 5000)
+    MESSAGES_MS_URL = '%s://%s:%s' % (MESSAGES_MS_PROTO, MESSAGES_MS_HOST, MESSAGES_MS_PORT)
     # notifications
     NOTIFICATIONS_MS_PROTO = os.getenv('NOTIFICATIONS_MS_PROTO', 'http')
     NOTIFICATIONS_MS_HOST = os.getenv('NOTIFICATIONS_MS_HOST', 'localhost')
-    NOTIFICATIONS_MS_PORT = os.getenv('NOTIFICATIONS_MS_PORT', 5001)
+    NOTIFICATIONS_MS_PORT = os.getenv('NOTIFICATIONS_MS_PORT', 5000)
     NOTIFICATIONS_MS_URL = '%s://%s:%s' % (NOTIFICATIONS_MS_PROTO, NOTIFICATIONS_MS_HOST, NOTIFICATIONS_MS_PORT)
+
+    # lottery
+    LOTTERY_MS_PROTO = os.getenv('LOTTERY_MS_PROTO', 'http')
+    LOTTERY_MS_HOST = os.getenv('LOTTERY_MS_HOST', 'localhost')
+    LOTTERY_MS_PORT = os.getenv('LOTTERY_MS_PORT', 5000)
+    LOTTERY_MS_URL = '%s://%s:%s' % (LOTTERY_MS_PROTO, LOTTERY_MS_HOST, LOTTERY_MS_PORT)
 
     # Configuring sessions
     SESSION_TYPE = 'redis'
 
     # secret key
-    SECRET_KEY = os.getenv('APP_SECRET_KEY', b'isreallynotsecretatall')
+    SECRET_KEY = os.getenv('APP_SECRET', b'isreallynotsecretatall')
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     UPLOAD_EXTENSIONS = ["jpg", "jpeg", "png"]
@@ -78,6 +88,6 @@ class ProdConfig(Config):
     DEBUG = False
 
     import os
-    SECRET_KEY = os.getenv('APP_SECRET_KEY', os.urandom(24))
+    SECRET_KEY = os.getenv('APP_SECRET', os.urandom(24))
 
 
