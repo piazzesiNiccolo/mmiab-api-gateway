@@ -1,12 +1,17 @@
 import datetime
 from datetime import timedelta
+import calendar
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required)
 from flask_login import current_user
 
 from typing import Text
 
+from mib.forms.draft import EditMessageForm
 from mib.rao.message_manager import MessageManager
+from mib.rao.user_manager import UserManager
+from mib.auth.user import User
+
 
 messages = Blueprint('messages', __name__)
 
@@ -177,4 +182,76 @@ def list_received_messages():
         list_type="received",
     )
 
+@messages.route('/message/send/<int:id_message>', methods=['POST'])
+@login_required
+def send(id_message):
+    
+    code, message = MessageManager.send_message(id_message, current_user.get_id())
+    
+    flash(message)
+    return redirect(url_for('home.index'))
 
+@messages.route('/draft/<int:id_message>', methods=["DELETE", "PUT"])
+@login_required
+def draft_edit(id_message):
+
+    if request.method == 'DELETE':
+
+        code, message = MessageManager.delete_draft(id_message, current_user.get_id())
+        
+        flash(message)
+        return redirect(url_for('home.index'))
+
+    elif request.method == 'PUT':
+        pass
+
+@messages.route("/timeline", methods=["GET"])
+@login_required
+def get_timeline_month():
+
+    _year = request.args.get('y',None)
+    _month = request.args.get('m',None)
+
+    first_day, number_of_days = calendar.monthrange(_year, _month)
+
+    sent,received,year_,month_ = MessageManager.get_timeline_month(current_user.id, _year,_month)
+
+    return render_template(
+        "calendar_bs.html",
+        calendar_view={
+            "year": year_,
+            "month": month_,
+            "month_name": calendar.month_name[month_],
+            "days_in_month": number_of_days,
+            "starts_with": first_day,
+            "sent": sent,
+            "received": received,
+        },
+    )
+
+@messages.route('/draft', methods=["POST", "GET"])
+@login_required
+def draft():
+    reply_to = request.args.get("reply_to", None)
+    send_to = request.args.get("send_to", None) if reply_to is None else None
+    replying_info = MessageManager.get_replying_info(reply_to, current_user.get_id())
+
+    form = EditMessageForm(recipients=[{"name": "Recipient"}])
+    available_recipients = UserManager.get_recipients(current_user.get_id())
+    for recipient_form in form.recipients:
+        recipient_form.recipient.choices = available_recipients
+    if request.method == "POST":
+        if form.validate_on_submit():
+            code = MessageManager.post_draft(form)
+
+            if(code == 200):
+                flash("Draft correctly created")
+            return redirect(url_for('home.index'))
+
+    return render_template(
+        "draft.html",
+        form=form,
+        replying_info=replying_info,
+        send_to=send_to,
+        available_recipients=available_recipients,
+    )

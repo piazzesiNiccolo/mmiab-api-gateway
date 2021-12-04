@@ -153,6 +153,28 @@ paths:
         401:
           description: Error on retriving messages
 
+  /timeline:
+    get:
+      tags: [ Message ]
+        summary: Return list 
+        parameters:
+        - name: y
+          in: query
+          description: year identifier
+          schema:
+            type: integer
+        - name: m
+          in: query
+          description: month identifier
+          schema:
+            type: integer
+      responses:
+          200:
+            description: Return list of messages
+          401:
+            description: Error on retriving messages
+
+
   /message/list/drafted/{id_usr}:
     get:
       tags: [ Message ]
