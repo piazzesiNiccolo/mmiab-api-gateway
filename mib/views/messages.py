@@ -1,5 +1,6 @@
 import datetime
 from datetime import timedelta
+import calendar
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required)
 from flask_login import current_user
@@ -145,4 +146,40 @@ def list_received_messages():
         list_type="received",
     )
 
+@messages.route("/timeline", methods=["GET"])
+@login_required
+def get_timeline_month(_year, _month):
+
+    _year = request.args.get('y',None)
+    _month = request.args.get('m',None)
+
+    first_day, number_of_days = calendar.monthrange(_year, _month)
+    sent, received = number_of_days * [0], number_of_days * [0]
+
+    message_list = MessageManager.get_timeline_month_mess_send(
+        current_user.id, _month, _year
+    )
+
+    for elem in message_list:
+        sent[elem.date_of_send.day - 1] += 1
+
+    message_list = MessageManager.get_timeline_month_mess_received(
+        current_user.id, _month, _year
+    )
+
+    for elem in message_list:
+        received[elem.date_of_send.day - 1] += 1
+
+    return render_template(
+        "calendar_bs.html",
+        calendar_view={
+            "year": _year,
+            "month": _month,
+            "month_name": calendar.month_name[_month],
+            "days_in_month": number_of_days,
+            "starts_with": first_day,
+            "sent": sent,
+            "received": received,
+        },
+    )
 
