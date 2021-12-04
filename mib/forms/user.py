@@ -26,7 +26,8 @@ class UserForm(FlaskForm):
     first_name = f.StringField( 'First Name', validators=[DataRequired()])
     last_name = f.StringField( 'Last Name', validators=[DataRequired()])
     password = f.PasswordField( 'Password', validators=[DataRequired()])
-    birthdate = DateField( 'Birthday', format="%d/%m/%Y", validators=[AgeValidator(min_age=13)])
+    # birthdate = DateField('Birthdate', format="%d/%m/%Y", validators=[AgeValidator(min_age=13)])
+    birthdate = DateField('Birthdate', validators=[AgeValidator(min_age=13)])
     nickname = f.StringField("Nickname", validators=[Optional()])
     location = f.StringField("Location", validators=[Optional()])
     profile_picture = FileField(
