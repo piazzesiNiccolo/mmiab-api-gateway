@@ -68,8 +68,7 @@ class MessageManager:
         return code, obj, message
 
     @classmethod
-    def retrieve_received_messages(cls,id_usr:int , data: datetime) -> Tuple[int, List[Message]]cls, id_message: int, id_user: int):
-        url = f'
+    def retrieve_received_messages(cls,id_usr:int , data: datetime) -> Tuple[int, List[Message]]:
         """
         Returns the list of received messages by a specific user.
         """
