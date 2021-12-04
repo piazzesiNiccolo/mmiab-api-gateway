@@ -303,5 +303,17 @@ class UserManager:
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return False, False
 
+    @classmethod
+    def get_recipients(cls, user_id):
+        endpoint = f"{cls.users_endpoint()}/user_status/{user_id}"
+
+        try:
+            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
+            json = response.json()
+            return [int(json[item]["nickname"]) for item in json]
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return False, False
+
 
 

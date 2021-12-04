@@ -19,7 +19,7 @@ class RecipientForm(FlaskForm):
 class EditMessageForm(FlaskForm):
     body_message = f.TextAreaField("Message", validators=[InputRequired()])
     date_of_send = f.DateTimeField(
-        "Delivery Date", format=delivery_format, validators=[Optional()]
+        "Delivery Date", validators=[Optional()]
     )
     recipients = f.FieldList(f.FormField(RecipientForm))
     display = ["body_message", "date_of_send", "recipients"]
