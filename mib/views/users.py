@@ -37,6 +37,8 @@ def create_user():
             flash('Unexpected response from users microservice!')
 
         return redirect(url_for('home.index'))
+    else:
+        print(form.birthdate.data)
 
     return render_template('create_user.html', form=form)
 
