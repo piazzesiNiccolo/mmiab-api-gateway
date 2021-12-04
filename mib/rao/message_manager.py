@@ -18,6 +18,43 @@ class MessageManager:
         return app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
+    def delete_draft(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/draft/{id_message}/{id_user}'
+        try:
+            response = requests.delete(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+        except:
+            return 500, "Unexpected response from messages microservice!"
+
+        return code, message
+
+    @classmethod
+    def delete_read_message(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/message/{id_message}/{id_user}'
+        try:
+            response = requests.delete(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+        except:
+            return 500, "Unexpected response from messages microservice!"
+
+        return code, message
+
+    @classmethod
+    def withdraw_message(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/message/withdraw/{id_message}/{id_user}'
+        try:
+            response = requests.delete(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+        except:
+            return 500, "Unexpected response from messages microservice!"
+
+        return code, message
+
+
+    @classmethod
     def read_message(cls, id_mess: int, id_usr: int) -> Tuple[int, Message, str]:
         try:
             url = "%s/message/%s/read/%s" % (cls.message_endpoint(), str(id_mess),str(id_usr))
@@ -31,16 +68,17 @@ class MessageManager:
         return code, obj, message
 
     @classmethod
-    def retrieve_received_messages(cls,id_usr:int , data: datetime) -> Tuple[int, List[Message]]
+    def retrieve_received_messages(cls,id_usr:int , data: datetime) -> Tuple[int, List[Message]]cls, id_message: int, id_user: int):
+        url = f'
         """
         Returns the list of received messages by a specific user.
         """
         try:
             if data is None:
-                url = "%s/message/list/received/%s" % (cls.users_endpoint(),str(id_usr))
+                url = "%s/message/list/received/%s" % (cls.message_endpoint(),str(id_usr))
             else:
                 data_format = 'y=%d&m=%d&d=%d' % (data.year,data.month,data.day)
-                url = "%s/message/list/received/%s?%s" % (cls.users_endpoint(),str(id_usr),data_format)
+                url = "%s/message/list/received/%s?%s" % (cls.message_endpoint(),str(id_usr),data_format)
 
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
@@ -56,7 +94,7 @@ class MessageManager:
         Returns the list of drafted messages by a specific user.
         """
         try:
-            url = "%s/message/list/drafted/%s" % (cls.users_endpoint(),str(id_usr))
+            url = "%s/message/list/drafted/%s" % (cls.message_endpoint(),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
@@ -72,10 +110,10 @@ class MessageManager:
         """
         try:
             if data is None:
-                url = "%s/message/list/sent/%s" % (cls.users_endpoint(),str(id_usr))
+                url = "%s/message/list/sent/%s" % (cls.message_endpoint(),str(id_usr))
             else:
                 data_format = 'y=%d&m=%d&d=%d' % (data.year,data.month,data.day)
-                url = "%s/message/list/sent/%s?%s" % (cls.users_endpoint(),str(id_usr),data_format)
+                url = "%s/message/list/sent/%s?%s" % (cls.message_endpoint(),str(id_usr),data_format)
 
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             print(response.json())

@@ -7,9 +7,39 @@ from flask_login import current_user
 from typing import Text
 
 from mib.rao.message_manager import MessageManager
-from mib.auth.user import User
 
 messages = Blueprint('messages', __name__)
+
+@messages.route('/draft/<int:id>/delete', methods=['GET'])
+@login_required
+def delete_draft(id):
+    _, message = MessageManager.delete_draft(id, current_user.id)
+    flash(message)
+    return redirect(url_for('messages.list_drafts'))
+
+@messages.route('/message/<int:id>/delete', methods=['GET'])
+@login_required
+def delete_read_message(id):
+    _, message = MessageManager.delete_read_message(id, current_user.id)
+    flash(message)
+    return redirect(url_for('messages.list_received_messages'))
+
+@messages.route('/message/<int:id>/withdraw', methods=['GET'])
+@login_required
+def withdraw_message(id):
+    _, message = MessageManager.withdraw_message(id, current_user.id)
+    flash(message)
+    return redirect(url_for('messages.list_sent_messages'))
+
+@messages.route('/message/<int:id>/forward', methods=['GET'])
+@login_required
+def forward_message(id):
+    pass
+
+@messages.route('/message/<int:id>/reply', methods=['GET'])
+@login_required
+def reply_to_message(id):
+    pass
 
 
 @messages.route("/message/{id}/read", methods=["GET"])
@@ -58,7 +88,7 @@ def mailbox_list_sent():
 
 @messages.route("/message/list/draft", methods=["GET"])
 @login_required
-def mailbox_list_drafted():
+def list_drafts():
     """
     Displays messages sent by current user
     :return: sent messages mailbox template
