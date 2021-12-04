@@ -128,7 +128,7 @@ class MessageManager:
         return code, obj, message
 
     @classmethod
-    def retrieve_received_messages(cls,id_usr:int , data: datetime) -> Tuple[int, List[Message]]:
+    def retrieve_received_messages(cls, id_usr: int , data: datetime):
         """
         Returns the list of received messages by a specific user.
         """
@@ -184,17 +184,19 @@ class MessageManager:
         return code,obj
 
     @classmethod
-    def get_timeline_month_mess_send(cls,id_usr: int, year: int, month: int):
+    def get_timeline_month(cls,id_usr: int, year: int, month: int):
         try:
-            url = "%s/timeline/list/sent/%s?%s" % (cls.users_endpoint(),str(id_usr),str(year),str(month))
+            data_format = 'y=%d&m=%d' % (year,month)
+            url = "%s/timeline/list/%s?%s" % (cls.users_endpoint(),str(id_usr),str(data_format))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             print(response.json())
             code = response.status_code
-            obj = response.json()['messages']
+            sent,received,year_,month_ = response.json()['messages_sent'],response.json()['messages_received'],\
+                response.json()['year'],response.json()['month']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected response from messages microservice!"
 
-        return code,obj
+        return code,sent,received,year_,month_
 
     @classmethod
     def post_draft(cls, form):
@@ -242,16 +244,4 @@ class MessageManager:
                 })
         else:
             return None
-
-    def get_timeline_month_mess_received(cls,id_usr: int, year: int, month: int):
-        try:
-            url = "%s/timeline/list/received/%s?%s" % (cls.users_endpoint(),str(id_usr),str(year),str(month))
-            response = requests.get(url, timeout=cls.requests_timeout_seconds())
-            print(response.json())
-            code = response.status_code
-            obj = response.json()['messages']
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected response from messages microservice!"
-
-        return code,obj
 

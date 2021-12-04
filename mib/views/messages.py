@@ -207,34 +207,21 @@ def draft_edit(id_message):
 
 @messages.route("/timeline", methods=["GET"])
 @login_required
-def get_timeline_month(_year, _month):
+def get_timeline_month():
 
     _year = request.args.get('y',None)
     _month = request.args.get('m',None)
 
     first_day, number_of_days = calendar.monthrange(_year, _month)
-    sent, received = number_of_days * [0], number_of_days * [0]
 
-    message_list = MessageManager.get_timeline_month_mess_send(
-        current_user.id, _month, _year
-    )
-
-    for elem in message_list:
-        sent[elem.date_of_send.day - 1] += 1
-
-    message_list = MessageManager.get_timeline_month_mess_received(
-        current_user.id, _month, _year
-    )
-
-    for elem in message_list:
-        received[elem.date_of_send.day - 1] += 1
+    sent,received,year_,month_ = MessageManager.get_timeline_month(current_user.id, _year,_month)
 
     return render_template(
         "calendar_bs.html",
         calendar_view={
-            "year": _year,
-            "month": _month,
-            "month_name": calendar.month_name[_month],
+            "year": year_,
+            "month": month_,
+            "month_name": calendar.month_name[month_],
             "days_in_month": number_of_days,
             "starts_with": first_day,
             "sent": sent,

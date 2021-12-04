@@ -158,12 +158,6 @@ paths:
       tags: [ Message ]
         summary: Return list 
         parameters:
-        - name: id_usr
-          in: path
-          description: User's unique identifier
-          required: true
-          schema:
-            type: integer
         - name: y
           in: query
           description: year identifier
