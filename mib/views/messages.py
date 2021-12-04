@@ -8,9 +8,39 @@ from flask_login import current_user
 from typing import Text
 
 from mib.rao.message_manager import MessageManager
-from mib.auth.user import User
 
 messages = Blueprint('messages', __name__)
+
+@messages.route('/draft/<int:id>/delete', methods=['GET'])
+@login_required
+def delete_draft(id):
+    _, message = MessageManager.delete_draft(id, current_user.id)
+    flash(message)
+    return redirect(url_for('messages.list_drafts'))
+
+@messages.route('/message/<int:id>/delete', methods=['GET'])
+@login_required
+def delete_read_message(id):
+    _, message = MessageManager.delete_read_message(id, current_user.id)
+    flash(message)
+    return redirect(url_for('messages.list_received_messages'))
+
+@messages.route('/message/<int:id>/withdraw', methods=['GET'])
+@login_required
+def withdraw_message(id):
+    _, message = MessageManager.withdraw_message(id, current_user.id)
+    flash(message)
+    return redirect(url_for('messages.list_sent_messages'))
+
+@messages.route('/message/<int:id>/forward', methods=['GET'])
+@login_required
+def forward_message(id):
+    pass
+
+@messages.route('/message/<int:id>/reply', methods=['GET'])
+@login_required
+def reply_to_message(id):
+    pass
 
 
 @messages.route("/message/{id}/read", methods=["GET"])
@@ -21,9 +51,10 @@ def read_messages(id):
     Let the user read the selected message
     """
 
-    code, obj = MessageManager.read_message(id,current_user.id)
+    code, obj, message = MessageManager.read_message(id,current_user.id)
     if code != 200:
-        flash("Error while retriving the message")
+        flash(message)
+        return redirect(url_for('messages.list_received_messages'))
         #TODO check return in case of failure
         #return redirect(url_for('mai'))
         #return mailbox 
@@ -58,26 +89,23 @@ def mailbox_list_sent():
 
 @messages.route("/message/list/draft", methods=["GET"])
 @login_required
-def mailbox_list_drafted():
+def list_drafts():
     """
     Displays messages sent by current user
     :return: sent messages mailbox template
     """
-    message_list = []
-    if current_user.is_authenticated:
-        code, obj = MessageManager.get_drafted_message_by_id_user(current_user.id)
+    code, messages = MessageManager.retrieve_drafts(current_user.id)
     
     if code != 200:
-        flash("Error while retriving the message")
+        flash("Unexpected response from messages microservice!")
         #TODO check return in case of failure
         #return redirect(url_for('mai'))
         #return mailbox
 
-
     return render_template(
         "mailbox.html",
-        message_list=obj,
-        list_type="drafted",
+        message_list=messages,
+        list_type="draft",
     )
 
 @messages.route("/message/list/sent", methods=["GET"])
@@ -98,18 +126,20 @@ def list_sent_messages():
     except ValueError:
         today_dt = None
         
-    code, obj = MessageManager.get_sended_message_by_id_user(current_user.id, dt=today_dt)
+    code, messages = MessageManager.retrieve_sent_messages(current_user.id, dt=today_dt)
+    if code != 200:
+        flash("Unexpected response from messages microservice!")
 
     tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
     yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
-    day_view = today_dt is None
+    day_view = today_dt is not None
 
     return render_template(
         "mailbox.html",
-        message_list=obj,
+        message_list=messages,
         tomorrow=tomorrow,
         yesterday=yesterday,
-        day_view = not day_view,
+        day_view=day_view,
         list_type="sent",
     )
 
@@ -131,18 +161,20 @@ def list_received_messages():
     except ValueError:
         today_dt = None
         
-    code, obj = MessageManager.get_received_message_by_id_user(current_user.id, dt=today_dt)
+    code, obj = MessageManager.retrieve_received_messages(current_user.id, dt=today_dt)
+    if code != 200:
+        flash("Unexpected response from messages microservice!")
 
     tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
     yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
-    day_view = today_dt is None
+    day_view = today_dt is not None
 
     return render_template(
         "mailbox.html",
         message_list=obj,
         tomorrow=tomorrow,
         yesterday=yesterday,
-        day_view = not day_view,
+        day_view=day_view,
         list_type="received",
     )
 
