@@ -21,6 +21,7 @@
                 var base_url = "{{url_for('users.blacklist') if blacklist == True else url_for('users.users_list')}}";
                 location.href = base_url + "?q=" + document.getElementById("search").value;
            }
+           // TODO: fix link 
            function sendToUser(user_id) {
                 var base_url = "{{url_for('home.index')}}";
                 location.href = base_url + "?send_to=" + user_id;
@@ -93,7 +94,7 @@
                                 <div class="row align-items-stretch h-100" style="margin-right: 8px;">
                                     <div class="col-3 py-2 d-flex justify-content-center h-100">
                                         <div class="rounded-circle d-flex justify-content-center" style="width: 80px; height: 80px; overflow: hidden;">
-                                            <a class="text-decoration-none" href="{{url_for('home.index', id=user.id)}}">
+                                            <a class="text-decoration-none" href="{{url_for('users.user_info', id=user.id)}}">
                                                 {% set propic = propics[loop.index0] %}
                                                 <img 
                                                     src="data:image/{{ propic['type'] }};base64,{{ propic['data'] | safe }}"
