@@ -57,7 +57,7 @@ class TestViewsUsers:
         resp = test_client.post("/create_user", data=data, follow_redirects=True)
         assert message in flask.get_flashed_messages()
         assert resp.status_code == 200
-        assert b"Message in a Bottle" in resp.data
+        assert b"mmiab" in resp.data
 
     @pytest.mark.parametrize(
         "code, message",

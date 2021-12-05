@@ -30,17 +30,15 @@ function get_new_notification(message, icon) {
 function _pop_notifications(notifications) {
 
     
-    /*
     var notifications= {
         'status_code': 200,
         'status': 'success',
         'data': {
-            'sender_notify': [],
+            'sender_notify': [{'id_message': 2, 'from_recipient': 'Anonymous'}],
             'recipient_notify': [{'id_message': 1}],
             'lottery_notify': [],
         },
     }
-    */
     
     console.log(notifications)
     if (notifications.status_code == 200) {

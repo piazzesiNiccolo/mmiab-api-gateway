@@ -16,7 +16,7 @@ class TestNotificationManager:
                 }
             
         })
-        code, _ = NotificationManager.get_notifications()
+        code, _ = NotificationManager.get_notifications(1)
         assert code == 200
     
     @pytest.mark.parametrize("ex",[
@@ -26,5 +26,5 @@ class TestNotificationManager:
     def test_get_notifications_unexpected_resp(self, mock_get,ex):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = ex()
-        code, _ = NotificationManager.get_notifications() 
+        code, _ = NotificationManager.get_notifications(1) 
         assert code == 500

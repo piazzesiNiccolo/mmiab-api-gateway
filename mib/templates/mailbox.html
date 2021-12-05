@@ -232,16 +232,16 @@
                                   </div>
                               </div>
                               <div class="row actions-row h-50 justify-content-center align-items-center">
+                              <!-- TODO: fix link -->
                               {% set edit_url = url_for('messages.edit_draft', id=id_message) %}
                               {% set send_url = url_for('messages.send_message', id=id_message) %}
-                              {% set forward_url = url_for('forward.forward_messages', id=id_message) %}
+                              {% set forward_url = url_for('messages.forward_messages', id=id_message) %}
                               {% set reply_url = url_for('messages.reply_to_message', id=id_message) %}
                               {% set withdraw_url = url_for('messages.withdraw_message', id=id_message) %}
 
                               {% if list_type == 'received' %}
-                                  {% set delete_url = url_for('messages.delete_message', id=id_message) %}
+                                  {% set delete_url = url_for('messages.delete_read_message', id=id_message) %}
                               {% elif list_type == 'draft' %}
-                                  {# TODO: add link #}
                                   {% set delete_url = url_for('messages.delete_draft', id=id_message) %}
                               {% endif %}
 

@@ -278,9 +278,21 @@ class TestMessageManager:
     @pytest.mark.parametrize('id_message, retval, res', [
         (None, None, None),
         (1, None, None),
-        (1, (Message(body_message='test'), {}, None), None),
-        (1, (Message(body_message='test'), {1: {}}, None), {'message': 'test', 'user': 'Anonymous'}),
-        (1, (Message(body_message='test'), {1: {'first_name': 'fn', 'last_name': 'ln'}}, None), {'message': 'test', 'user': 'fn ln'}),
+        (
+            1, 
+            (Message(body_message='test'), {}, None), 
+            {'message': {'body_message': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+        ),
+        (
+            1, 
+            (Message(body_message='test'), {2: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
+            {'message': {'body_message': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+        ),
+        (
+            1, 
+            (Message(body_message='test'), {1: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
+            {'message': {'body_message': 'test', 'delivery_date': None}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
+        ),
     ])
     def test_get_replying_info(self, id_message, retval, res):
         with mock.patch('mib.rao.message_manager.MessageManager.get_message') as m:

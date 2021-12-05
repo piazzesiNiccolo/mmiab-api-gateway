@@ -12,8 +12,8 @@ class NotificationManager:
         return app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
-    def get_notifications(cls) -> Tuple[int, str]:
-        endpoint = f"{cls.notifications_endpoint()}/notifications"
+    def get_notifications(cls, user_id: int) -> Tuple[int, str]:
+        endpoint = f"{cls.notifications_endpoint()}/notifications/{user_id}"
         try:
             response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             data = response.json()

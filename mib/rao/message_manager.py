@@ -237,12 +237,25 @@ class MessageManager:
                 body_message = message.body_message
                 user_dict = users.get(id_user, None)
                 if user_dict is not None:
-                    _fn, _ln = user_dict.get('first_name', None), user_dict.get('last_name', None)
-                    user = _fn + ' ' + _ln if (_fn, _ln) != (None, None) else 'Anonymous'
-                    return ({
-                        "message": body_message,
-                        "user": user,
-                    })
+                    _user = {
+                        'id': id_user,
+                        'first_name': user_dict['first_name'],
+                        'last_name': user_dict['last_name'],
+                    }
+                else:
+                    _user = {
+                        'id': 0,
+                        'first_name': 'Anonymous',
+                        'last_name': '',
+                    }
+
+                return ({
+                    "message": {
+                        "body_message":  body_message,
+                        "delivery_date": message.delivery_date
+                    },
+                    "user": _user,
+                })
 
         return None
 
