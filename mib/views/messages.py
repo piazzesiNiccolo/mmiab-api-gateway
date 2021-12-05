@@ -47,24 +47,27 @@ def reply_to_message(id):
     pass
 
 
-@messages.route("/message/{id}/read", methods=["GET"])
+@messages.route("/message/<int:id>/read", methods=["GET"])
 @login_required
 def read_messages(id):
-
     """
     Let the user read the selected message
     """
-
-    code, obj, message = MessageManager.read_message(id,current_user.id)
+    code, obj, message = MessageManager.get_message(id,current_user.id)
     if code != 200:
         flash(message)
         return redirect(url_for('messages.list_received_messages'))
-        #TODO check return in case of failure
-        #return redirect(url_for('mai'))
-        #return mailbox 
-    
-    return render_template('read_message.html', message=obj)
 
+    (msg, users, image) = obj
+    
+    return render_template(
+        'read_message.html',
+        message=msg,
+        users=users,
+        image=image
+    )
+
+'''
 @messages.route("/message/list/sent", methods=["GET"])
 @login_required
 def mailbox_list_sent():
@@ -72,7 +75,6 @@ def mailbox_list_sent():
     Displays messages sent by current user
     :return: sent messages mailbox template
     """
-    message_list = []
     if current_user.is_authenticated:
         code, obj = MessageManager.get_sended_message_by_id_user(current_user.id)
     
@@ -89,6 +91,7 @@ def mailbox_list_sent():
         list_type="sent",
         withdraw=current_user.lottery_points > 0,
     )
+'''
 
 
 @messages.route("/message/list/draft", methods=["GET"])
@@ -182,14 +185,12 @@ def list_received_messages():
         list_type="received",
     )
 
-@messages.route('/message/send/<int:id_message>', methods=['POST'])
+@messages.route('/message/<int:id_message>/send', methods=['GET'])
 @login_required
-def send(id_message):
-    
-    code, message = MessageManager.send_message(id_message, current_user.get_id())
-    
+def send_message(id_message):
+    _, message = MessageManager.send_message(id_message, current_user.get_id())
     flash(message)
-    return redirect(url_for('home.index'))
+    return redirect(url_for('messages.list_sent_messages'))
 
 @messages.route('/draft/<int:id_message>', methods=["DELETE", "PUT"])
 @login_required
@@ -211,21 +212,29 @@ def get_timeline_month():
 
     _year = request.args.get('y',None)
     _month = request.args.get('m',None)
+    try:
+        y_i, m_i = int(_year), int(_month)
+        dt = datetime(y_i, m_i, 1)
+    except (ValueError, TypeError):
+        dt = datetime.today()
 
-    first_day, number_of_days = calendar.monthrange(_year, _month)
+    first_day, number_of_days = calendar.monthrange(dt.year, dt.month)
 
-    sent,received,year_,month_ = MessageManager.get_timeline_month(current_user.id, _year,_month)
+    code , timeline = MessageManager.get_timeline_month(current_user.id, dt)
+    if code != 200:
+        flash("Unexpected response from messages microservice!")
+        return redirect(url_for('messages.list_received_messages'))
 
     return render_template(
         "calendar_bs.html",
         calendar_view={
-            "year": year_,
-            "month": month_,
-            "month_name": calendar.month_name[month_],
+            "year": timeline.year,
+            "month": timeline.month,
+            "month_name": calendar.month_name[timeline.month],
             "days_in_month": number_of_days,
             "starts_with": first_day,
-            "sent": sent,
-            "received": received,
+            "sent": timeline.sent,
+            "received": timeline.received,
         },
     )
 

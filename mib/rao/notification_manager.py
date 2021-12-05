@@ -13,9 +13,9 @@ class NotificationManager:
 
     @classmethod
     def get_notifications(cls) -> Tuple[int, str]:
-        endpoint = f"{cls.NOTIFICATIONS_ENDPOINT}/notifications"
+        endpoint = f"{cls.notifications_endpoint()}/notifications"
         try:
-            response = requests.get(endpoint, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             data = response.json()
             notifications = data.get("data")
             return response.status_code, notifications
@@ -24,9 +24,9 @@ class NotificationManager:
 
     @classmethod
     def add_notifications(cls, data) -> int:
-        endpoint = f'{cls.NOTIFICATIONS_ENDPOINT}/notifications/add'
+        endpoint = f'{cls.notifications_endpoint()}/notifications/add'
         try:
-            response = requests.post(endpoint, data=data, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.post(endpoint, data=data, timeout=cls.requests_timeout_seconds())
             return response.status_code
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected reponse from user microservice"
