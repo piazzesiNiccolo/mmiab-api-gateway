@@ -188,7 +188,9 @@ class TestMessageManager:
         assert code == 500
         assert obj == []
         mock_get.reset_mock(side_effect=True)
-
+    
+    def test_post_draft(self, mock_post):
+        pass
     def test_retrieve_drafts(self, mock_get):
         mock_get.reset_mock(side_effect=True)
 
