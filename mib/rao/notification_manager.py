@@ -22,13 +22,5 @@ class NotificationManager:
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected reponse from user microservice"
 
-    @classmethod
-    def add_notifications(cls, data) -> int:
-        endpoint = f'{cls.notifications_endpoint()}/notifications/add'
-        try:
-            response = requests.post(endpoint, data=data, timeout=cls.requests_timeout_seconds())
-            return response.status_code
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected reponse from user microservice"
         
 

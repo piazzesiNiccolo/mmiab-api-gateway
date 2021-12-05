@@ -28,3 +28,6 @@ class TestNotificationManager:
         mock_get.side_effect = ex()
         code, _ = NotificationManager.get_notifications() 
         assert code == 500
+        mock_get.reset_mock(side_effect=True)
+
+

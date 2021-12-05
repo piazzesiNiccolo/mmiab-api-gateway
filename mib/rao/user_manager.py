@@ -305,15 +305,15 @@ class UserManager:
 
     @classmethod
     def get_recipients(cls, user_id):
-        endpoint = f"{cls.users_endpoint()}/user_status/{user_id}"
+        endpoint = f"{cls.users_endpoint()}/recipients/{user_id}"
 
         try:
             response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             json = response.json()
-            return [int(json[item]["nickname"]) for item in json]
+            return [(item["id"],item["nickname"] if item["nickname"] else item["email"])  for item in json["users"]]
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return False, False
+            return []
 
 
 
