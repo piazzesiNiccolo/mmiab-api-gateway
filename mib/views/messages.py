@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from datetime import timedelta
 import calendar
 from flask import Blueprint, redirect, render_template, url_for, flash, request
@@ -129,24 +129,30 @@ def list_sent_messages():
     day = request.args.get('d',None)
 
     try:
-        today_dt = datetime(year, month, day)
-    except ValueError:
-        today_dt = None
+        y_i, m_i, d_i = int(year), int(month), int(day)
+        day_dt = datetime(y_i, m_i, d_i)
+    except (ValueError, TypeError):
+        day_dt = None
         
-    code, messages = MessageManager.retrieve_sent_messages(current_user.id, dt=today_dt)
+    code, messages = MessageManager.retrieve_sent_messages(current_user.id, data=day_dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
-    tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
-    yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
-    day_view = today_dt is not None
+    calendar_view = None
+    if day_dt is not None:
+        tomorrow = day_dt + timedelta(days=1)
+        yesterday = day_dt - timedelta(days=1)
+        calendar_view = {
+            'today': (day_dt.year, day_dt.month, day_dt.day),
+            'tomorrow': (tomorrow.year, tomorrow.month, tomorrow.day),
+            'yesterday': (yesterday.year, yesterday.month, yesterday.day),
+        }
+
 
     return render_template(
         "mailbox.html",
         message_list=messages,
-        tomorrow=tomorrow,
-        yesterday=yesterday,
-        day_view=day_view,
+        calendar_view=calendar_view,
         list_type="sent",
     )
 
@@ -164,24 +170,29 @@ def list_received_messages():
     day = request.args.get('d',None)
 
     try:
-        today_dt = datetime(year, month, day)
-    except ValueError:
-        today_dt = None
+        y_i, m_i, d_i = int(year), int(month), int(day)
+        day_dt = datetime(y_i, m_i, d_i)
+    except (ValueError, TypeError):
+        day_dt = None
         
-    code, obj = MessageManager.retrieve_received_messages(current_user.id, dt=today_dt)
+    code, obj = MessageManager.retrieve_received_messages(current_user.id, data=day_dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
-    tomorrow = today_dt + timedelta(days=1) if today_dt is not None else None
-    yesterday = today_dt - timedelta(days=1) if today_dt is not None else None
-    day_view = today_dt is not None
+    calendar_view = None
+    if day_dt is not None:
+        tomorrow = day_dt + timedelta(days=1)
+        yesterday = day_dt - timedelta(days=1)
+        calendar_view = {
+            'today': (day_dt.year, day_dt.month, day_dt.day),
+            'tomorrow': (tomorrow.year, tomorrow.month, tomorrow.day),
+            'yesterday': (yesterday.year, yesterday.month, yesterday.day),
+        }
 
     return render_template(
         "mailbox.html",
         message_list=obj,
-        tomorrow=tomorrow,
-        yesterday=yesterday,
-        day_view=day_view,
+        calendar_view=calendar_view,
         list_type="received",
     )
 
@@ -226,7 +237,7 @@ def get_timeline_month():
         return redirect(url_for('messages.list_received_messages'))
 
     return render_template(
-        "calendar_bs.html",
+        "calendar.html",
         calendar_view={
             "year": timeline.year,
             "month": timeline.month,

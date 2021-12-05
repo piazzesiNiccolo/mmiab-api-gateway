@@ -29,32 +29,39 @@ function get_new_notification(message, icon) {
 
 function _pop_notifications(notifications) {
 
+    
     /*
     var notifications= {
-        'sender_notify': [],
-        'recipient_notify': [{'id_message': 1}],
-        'lottery_notify': [],
+        'status_code': 200,
+        'status': 'success',
+        'data': {
+            'sender_notify': [],
+            'recipient_notify': [{'id_message': 1}],
+            'lottery_notify': [],
+        },
     }
     */
-
+    
     console.log(notifications)
-    var alert_box = document.getElementById("alert-box")
-    for (n of notifications.sender_notify) {
-        var alert = get_new_notification(n['from_recipient'] + ' has opened the message you sent!', get_message_icon())
-        alert_box.appendChild(alert);
-    }
-    for (n of notifications.recipient_notify ) {
-        var alert = get_new_notification('You received a new message!', get_message_icon())
-        alert_box.appendChild(alert);
-    }
-    for (n of notifications.lottery_notify ) {
-        var alert = get_new_notification('You won the lottery and got a whole new point!', get_lottery_icon())
-        alert_box.appendChild(alert);
+    if (notifications.status_code == 200) {
+        var alert_box = document.getElementById("alert-box")
+        for (n of notifications.data.sender_notify) {
+            var alert = get_new_notification(n['from_recipient'] + ' has opened the message you sent!', get_message_icon())
+            alert_box.appendChild(alert);
+        }
+        for (n of notifications.data.recipient_notify ) {
+            var alert = get_new_notification('You received a new message!', get_message_icon())
+            alert_box.appendChild(alert);
+        }
+        for (n of notifications.data.lottery_notify ) {
+            var alert = get_new_notification('You won the lottery and got a whole new point!', get_lottery_icon())
+            alert_box.appendChild(alert);
+        }
     }
 }
 
 function get_notifications(){
-  fetch('/notification').
+  fetch('/notifications').
       then(
           function(response) {
               return response.json();

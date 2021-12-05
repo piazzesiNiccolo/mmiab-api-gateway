@@ -16,12 +16,14 @@
         <style>
             {% include "css/style.css" %} 
         </style>
+        <!--
         <script>
            function searchUser() {
-                var base_url = "{{url_for('home.index') if blacklist == True else url_for('users.users_list')}}";
+                var base_url = "{{url_for('users.blacklist.index') if blacklist == True else url_for('users.users_list')}}";
                 location.href = base_url + "?q=" + document.getElementById("search").value;
            }
            function sendToUser(user_id) {
+                // TODO: fix link
                 var base_url = "{{url_for('home.index')}}";
                 location.href = base_url + "?send_to=" + user_id;
            }
@@ -30,6 +32,7 @@
                 location.href = base_url + user_id;
            }
         </script>
+        -->
         <!--
         <link rel="stylesheet" href="css/style.css">
         -->
@@ -131,20 +134,21 @@
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="settings-button">
                                         {% if current_user.id == user.id %}
-                                        <li><a class="dropdown-item" href="{{url_for('home.index')}}">
+                                        <!-- TODO: fix link -->
+                                        <li><a class="dropdown-item" href="{{url_for('users.edit_user_profile')}}">
                                                 Edit Profile
                                         </a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         {% if current_user.lottery_points > 0 %}
-                                        <li><a class="dropdown-item text-danger" href="{{url_for('home.index')}}">
+                                        <li><a class="dropdown-item text-danger" href="{{url_for('messages.list_sent_messages')}}">
                                                 Withdraw Sent Messages!
                                         </a></li>
                                         {% endif %}
                                         <li><a class="dropdown-item" href="{{url_for('users.set_content_filter')}}">
                                                 {{'Disable' if user.content_filter == True else 'Enable' }} Content Filter
                                         </a></li>
-                                        <li><a class="dropdown-item" href="{{url_for('home.index')}}">Blacklist</a></li>
-                                        <li><a class="dropdown-item" href="{{url_for('home.index')}}" onclick="return confirm(' Are you sure you want to delete your account? Remember that ALL sent messages will still be available to the recipients');">
+                                        <li><a class="dropdown-item" href="{{url_for('users.blacklist')}}">Blacklist</a></li>
+                                        <li><a class="dropdown-item" href="{{url_for('users.delete_user', id=current_user.id)}}" onclick="return confirm(' Are you sure you want to delete your account? Remember that ALL sent messages will still be available to the recipients');">
                                             Delete Account
                                         </a></li>
                                         <li><hr class="dropdown-divider"></li>

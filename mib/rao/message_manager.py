@@ -154,7 +154,7 @@ class MessageManager:
         Returns the list of drafted messages by a specific user.
         """
         try:
-            url = "%s/message/list/drafted/%s" % (cls.message_endpoint(),str(id_usr))
+            url = "%s/message/list/draft/%s" % (cls.message_endpoint(),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]

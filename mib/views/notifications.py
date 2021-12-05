@@ -12,17 +12,17 @@ def get_notifications():
     code, data = NotificationManager.get_notifications()
     print('status_code:', code)
     if code == 200:
-        return {
+        return jsonify(notifications={
             "status_code" : 200,
             "status" : "success",
             "data" : data,
-        }
+        })
     else:
-        return {
+        return jsonify(notifications={
             "status_code" : 500,
             "status" : "failed",
             "message" : "Unexpected reponse from user microservice"
-            }
+            })
 
 @notifications.route('/notifications/add', methods=['POST'])
 def add_notifications():
