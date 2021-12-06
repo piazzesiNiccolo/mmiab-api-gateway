@@ -147,7 +147,7 @@
               <!-- TODO: fix below -->
               {% for m in message_list: %}
                 {% if list_type != 'received' %}
-                    {% set message_url = url_for('messges.read_messages', id=m.id_message) %}
+                    {% set message_url = url_for('messages.read_messages', id=m.id_message) %}
                     {% set body_message = m.body_message %}
                     {% set datetime_list = (m.delivery_date|delivery_datetime_format).split(' ') %}
                     {% set id_message = m.id_message %}

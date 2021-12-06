@@ -79,3 +79,88 @@ class TestViewMessages:
                 }
         response = test_client.post("/draft", data=data, follow_redirects=True)
         assert response.status_code == 200
+    ''''
+    @pytest.mark.parametrize('code, obj', [
+        (200, (Message(id_sender=1,is_sent=False,is_arrived=False, body_message='test body'),\
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
+        (401, (None, {}, {})),
+    ])
+    def test_list_drafts(self, test_client, mock_current_user, code, obj):
+        with mock.patch('mib.rao.message_manager.MessageManager.retrieve_drafts') as m:
+            m.return_value = code, obj, {}
+            response = test_client.get('/message/list/draft')
+            if code != 200:
+                assert response.status_code == 401
+            else:
+                assert response.status_code == 200
+
+    @pytest.mark.parametrize('code, obj', [
+        (200, (Message(id_sender=1,is_sent=True, body_message='test body'),\
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
+        (401, (None, {}, {})),
+    ])
+    def test_list_sent_messages(self, test_client, mock_current_user, code, obj):
+        with mock.patch('mib.rao.message_manager.MessageManager.retrieve_sent_messages') as m:
+            m.return_value = code, obj, {}
+            response = test_client.get('/message/list/sent')
+            if code != 200:
+                assert response.status_code == 401
+            else:
+                assert response.status_code == 200
+
+    @pytest.mark.parametrize('code, obj', [
+        (200, (Message(id_sender=1,is_sent=True, body_message='test body'),\
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
+        (401, (None, {}, {})),
+    ])
+    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
+        with mock.patch('mib.rao.message_manager.MessageManager.retrieve_sent_messages') as m:
+            m.return_value = code, obj, {}
+            response = test_client.get('/message/list/sent?y=2021&m=01&d=01')
+            if code != 200:
+                assert response.status_code == 401
+            else:
+                assert response.status_code == 200
+
+    @pytest.mark.parametrize('code, obj', [
+        (200, (Message(id_sender=1,is_sent=True, is_arrived=True, body_message='test body'),\
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
+        (401, (None, {}, {})),
+    ])
+    def test_list_sent_messages(self, test_client, mock_current_user, code, obj):
+        with mock.patch('mib.rao.message_manager.MessageManager.retrieve_received_messages') as m:
+            m.return_value = code, obj, {}
+            response = test_client.get('/message/list/received')
+            if code != 200:
+                assert response.status_code == 401
+            else:
+                assert response.status_code == 200
+
+    @pytest.mark.parametrize('code, obj', [
+        (200, (Message(id_sender=1,is_sent=True,is_arrived=True, body_message='test body'),\
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
+        (401, (None, {}, {})),
+    ])
+    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
+        with mock.patch('mib.rao.message_manager.MessageManager.retrieve_received_messages') as m:
+            m.return_value = code, obj, {}
+            response = test_client.get('/message/list/received?y=2021&m=01&d=01')
+            if code != 200:
+                assert response.status_code == 401
+            else:
+                assert response.status_code == 200
+    '''
+
+    @pytest.mark.parametrize('code, obj', [
+        (200, (Message(id_sender=1,is_sent=True,is_arrived=True, body_message='test body'),\
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
+        (401, (None, {}, {})),
+    ])
+    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
+        with mock.patch('mib.rao.message_manager.MessageManager.get_timeline_month') as m:
+            m.return_value = code, obj, {}
+            response = test_client.get('/timeline?y=2021&m=01')
+            if code != 200:
+                assert response.status_code == 401
+            else:
+                assert response.status_code == 200
