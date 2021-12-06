@@ -143,10 +143,11 @@ class MessageManager:
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
+            senders = response.json()['senders']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, []
+            return 500, [], {}
 
-        return code,obj
+        return code,obj, senders
 
     @classmethod
     def retrieve_drafts(cls, id_usr: int) -> Tuple[int, List[Message]]:
@@ -158,10 +159,11 @@ class MessageManager:
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
+            recipients = response.json()['recipients']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, []
+            return 500, [], {}
 
-        return code,obj
+        return code,obj,recipients
 
     @classmethod
     def retrieve_sent_messages(cls,id_usr: int, data: datetime = None) -> Tuple[int, List[Message]]:
@@ -179,10 +181,11 @@ class MessageManager:
             print(response.json())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
+            recipients = response.json()['recipients']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, []
+            return 500, [], {}
 
-        return code,obj
+        return code,obj,recipients
 
     @classmethod
     def get_timeline_month(cls,id_usr: int, dt: datetime):

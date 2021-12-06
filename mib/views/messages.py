@@ -101,7 +101,7 @@ def list_drafts():
     Displays messages sent by current user
     :return: sent messages mailbox template
     """
-    code, messages = MessageManager.retrieve_drafts(current_user.id)
+    code, messages, recipients = MessageManager.retrieve_drafts(current_user.id)
     
     if code != 200:
         flash("Unexpected response from messages microservice!")
@@ -134,7 +134,7 @@ def list_sent_messages():
     except (ValueError, TypeError):
         day_dt = None
         
-    code, messages = MessageManager.retrieve_sent_messages(current_user.id, data=day_dt)
+    code, messages, recipients = MessageManager.retrieve_sent_messages(current_user.id, data=day_dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
@@ -175,7 +175,7 @@ def list_received_messages():
     except (ValueError, TypeError):
         day_dt = None
         
-    code, obj = MessageManager.retrieve_received_messages(current_user.id, data=day_dt)
+    code, obj, senders = MessageManager.retrieve_received_messages(current_user.id, data=day_dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
