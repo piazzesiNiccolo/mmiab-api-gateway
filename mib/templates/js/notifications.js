@@ -30,6 +30,7 @@ function get_new_notification(message, icon) {
 function _pop_notifications(notifications) {
 
     
+    /*
     var notifications= {
         'status_code': 200,
         'status': 'success',
@@ -39,6 +40,7 @@ function _pop_notifications(notifications) {
             'lottery_notify': [],
         },
     }
+    */
     
     console.log(notifications)
     if (notifications.status_code == 200) {

@@ -304,16 +304,20 @@ class UserManager:
             return False, False
 
     @classmethod
-    def get_recipients(cls, user_id):
-        endpoint = f"{cls.users_endpoint()}/recipients/{user_id}"
+    def get_recipients(cls, user_id, query: str = None):
+        qstr = f'?q={query}' if query is not None else ''
+        endpoint = f"{cls.users_endpoint()}/recipients/{user_id}{qstr}"
 
         try:
             response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             json = response.json()
-            return [(item["id"],item["nickname"] if item["nickname"] else item["email"])  for item in json["users"]]
+            if response.status_code == 200:
+                return [(item["id"],item["nickname"] if item["nickname"] else item["email"]) for item in json["users"]]
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return []
+
+        return []
 
 
 

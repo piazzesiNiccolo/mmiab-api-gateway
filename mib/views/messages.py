@@ -59,6 +59,7 @@ def read_messages(id):
         return redirect(url_for('messages.list_received_messages'))
 
     (msg, users, image) = obj
+    print('users', users)
     
     return render_template(
         'read_message.html',
@@ -102,6 +103,8 @@ def list_drafts():
     :return: sent messages mailbox template
     """
     code, messages, recipients = MessageManager.retrieve_drafts(current_user.id)
+    print('view', messages)
+    print('view', recipients)
     
     if code != 200:
         flash("Unexpected response from messages microservice!")
@@ -112,7 +115,9 @@ def list_drafts():
     return render_template(
         "mailbox.html",
         message_list=messages,
+        recipients=recipients,
         list_type="draft",
+        calendar_view=None,
     )
 
 @messages.route("/message/list/sent", methods=["GET"])
@@ -152,6 +157,7 @@ def list_sent_messages():
     return render_template(
         "mailbox.html",
         message_list=messages,
+        recipients=recipients,
         calendar_view=calendar_view,
         list_type="sent",
     )
@@ -192,14 +198,15 @@ def list_received_messages():
     return render_template(
         "mailbox.html",
         message_list=obj,
+        senders=senders,
         calendar_view=calendar_view,
         list_type="received",
     )
 
-@messages.route('/message/<int:id_message>/send', methods=['GET'])
+@messages.route('/message/<int:id>/send', methods=['GET'])
 @login_required
-def send_message(id_message):
-    _, message = MessageManager.send_message(id_message, current_user.get_id())
+def send_message(id):
+    _, message = MessageManager.send_message(id, current_user.get_id())
     flash(message)
     return redirect(url_for('messages.list_sent_messages'))
 
@@ -262,11 +269,15 @@ def draft():
         recipient_form.recipient.choices = available_recipients
     if request.method == "POST":
         if form.validate_on_submit():
-            code = MessageManager.post_draft(form)
 
-            if(code == 200):
+            form_data = MessageManager.form_to_dict(form)
+            code, _ = MessageManager.post_draft(form_data, current_user.id)
+            if(code == 201):
                 flash("Draft correctly created")
-            return redirect(url_for('home.index'))
+                return redirect(url_for('messages.list_drafts'))
+            else:
+                flash("Something went wrong")
+                return redirect(url_for('home.index'))
 
     return render_template(
         "draft.html",

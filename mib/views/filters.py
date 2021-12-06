@@ -16,6 +16,7 @@ def delivery_datetime_format(value, format="%H:%M %d/%m/%Y"):
     """
     filter used to properly format delivery date in html templates
     """
+    print('value', value)
     return value.strftime(format) if value != None else ""
 
 
