@@ -21,7 +21,7 @@
             {% include "js/manage_recipients.js" %}
             {% if edit == True %}
                 window.addEventListener('load', function() {
-                    document.getElementById("body_message").value = '{{old_message}}';
+                    document.getElementById("message_body").value = '{{old_message}}';
                 });
             {% endif %}
         </script>
@@ -46,7 +46,7 @@
                     {% endif %}
                 {% endwith %}
 
-                {% set fields = ['body_message', 'date_of_send', 'image'] %}
+                {% set fields = ['message_body', 'delivery_date', 'image'] %}
                 {% for field in fields %}
                     {% if form[field].errors %}
                         {% for e in form[field].errors %}
@@ -83,25 +83,25 @@
                     {{ form.hidden_tag() }}
                     <div class="form-floating my-2">
                        <textarea 
-                           name="body_message" 
+                           name="message_body" 
                            class="form-control" 
                            placeholder="Type a message here" 
-                           id="body_message" 
+                           id="message_body" 
                            style="height: 140px" 
                            required></textarea>
-                       <label for="body_message">Body</label>
+                       <label for="message_body">Body</label>
                     </div>
                     <div class="input-group mb-3">
                         <div class="form-floating vstack">
                             <input 
-                                id="date_of_send" 
-                                name="date_of_send" 
+                                id="delivery_date" 
+                                name="delivery_date" 
                                 type="text" 
                                 class="form-control" 
                                 placeholder="12:45 08/12/2021" 
                                 value="{{old_date|delivery_datetime_format if edit == True}}"
                             >
-                            <label for="date_of_send">Delivery Date</label>
+                            <label for="delivery_date">Delivery Date</label>
                         </div>
                         <span class="input-group-text">HH:MM dd/mm/yyyy</span>
                     </div>
@@ -186,7 +186,7 @@
         <div class="row justify-content-center mb-2" style="margin-top: 60px;">
             <div class="col-8">
                 <div class="hstack">
-                    <span class="m-1 fs-5 text-navy">{{replying_info['message'].date_of_send|delivery_datetime_format}}</span>
+                    <span class="m-1 fs-5 text-navy">{{replying_info['message'].delivery_date|delivery_datetime_format}}</span>
                     <span class="m-1 ms-auto fw-bold fs-5 text-navy">replying to:</span>
                     <a href="{{url_for('users.user_info', id=replying_info['user'].id)}}"
                         <span class="m-1 text-decoration-none badge bg-primary text-white rounded-pill fs-5">
@@ -199,7 +199,7 @@
         <div class="row justify-content-center mb-2">
             <div class="col-8">
                 <div class="shadow-sm border border-success rounded-3 text-navy fs-5" style="padding: 20px 35px 50px 35px; min-height: 200px;">
-                    {{ replying_info['message'].body_message }}
+                    {{ replying_info['message'].message_body }}
                 </div>
             </div>
         </div>

@@ -48,9 +48,9 @@
                     <span class="m-1 ms-auto fw-bold fs-5 text-navy">from:</span>
                     <a href="{{url_for('users.user_info', id=message.id_sender)}}"
                         <span class="m-1 text-decoration-none badge rounded-pill bg-primary text-white fs-5">
-                            {% set sender = users[message.id_sender] %}
+                            {% set sender = users[message.id_sender|string] %}
                             {% if sender is not none %}
-                                {{ sender.first_name }} {{ sender.last_name }}
+                                {{ sender['first_name'] }} {{ sender['last_name'] }}
                             {% else %}
                                 Anonymous
                             {% endif %}
@@ -72,7 +72,7 @@
         <div class="row justify-content-center mb-2">
             <div class="col-7">
                 <div class="shadow-sm border border-primary rounded-3 text-navy fs-5" style="padding: 20px 35px 50px 35px; min-height: 200px;">
-                    {{ message.body_message }}
+                    {{ message.message_body }}
                 </div>
             </div>
         </div>
@@ -81,9 +81,9 @@
                 <div class="hstack" style="flex-flow: row wrap;">
                     <span class="m-1 fw-bold fs-5 text-navy">to:</span>
                     {% for rcp in message.recipients %}
-                        <a href="{{url_for('users.user_info', id=rcp.id_recipient)}}"
+                        <a href="{{url_for('users.user_info', id=rcp)}}"
                             <span class="m-1 text-decoration-none badge bg-primary text-white rounded-pill fs-5">
-                                {{ rcp.user.firstname }} {{ rcp.user.lastname }}
+                                {{ users[rcp|string]['first_name'] }} {{ users[rcp|string]['last_name'] }}
                             </span>
                         </a>
                     {% endfor %}
@@ -107,7 +107,7 @@
         <div class="row justify-content-center mb-2">
             <div class="col-7">
                 <div class="shadow-sm border border-success rounded-3 text-navy fs-5" style="padding: 20px 35px 50px 35px; min-height: 200px;">
-                    {{ replying_info['message']['body_message'] }}
+                    {{ replying_info['message']['message_body'] }}
                 </div>
             </div>
         </div>
