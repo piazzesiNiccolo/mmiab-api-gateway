@@ -2,7 +2,7 @@
     function searchUsersNav() {
         console.log("test search users");
         var search_bar = document.getElementById("text-search-users");
-        location.href="/user_list?q=" + search_bar.value;
+        location.href="/users?q=" + search_bar.value;
         //console.log(search_bar.value);
     }
 </script>
@@ -18,15 +18,16 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mb-2 ms-3 mb-lg-0 fs-5">
                 <li class="nav-item mx-2">
-                    <a class="nav-link active" href="{{url_for('home.index')}}">New Draft</a>
+                    <a class="nav-link active" href="{{url_for('messages.draft')}}">New Draft</a>
                 </li>
                 <li class="nav-item mx-2">
-                    <a class="nav-link active" href="{{url_for('home.index')}}">Mailbox</a>
+                    <a class="nav-link active" href="{{url_for('messages.list_received_messages')}}">Mailbox</a>
                 </li>
                 <li class="nav-item mx-2">
-                    <a class="nav-link active" href="{{url_for('home.index')}}">Timeline</a>
+                    <a class="nav-link active" href="{{url_for('messages.get_timeline_month')}}">Timeline</a>
                 </li>
                 <li class="nav-item mx-2">
+                    <!-- TODO: edit link -->
                     <a class="nav-link active" href="{{url_for('home.index')}}">Lottery</a>
                 </li>
             </ul>
@@ -57,9 +58,9 @@
                 <div class="btn-group">
                     <button type="button" class="btn btn-outline-info">
                         <div class="rounded-circle d-flex justify-content-center" style="width: 40px; height: 40px; overflow: hidden;">
-                            <a class="text-decoration-none" href="{{url_for('home.index', id=current_user.id)}}">
+                            <a class="text-decoration-none" href="{{url_for('users.user_profile')}}">
                                 <img 
-                                    src="{{'/static/assets/' + (current_user.pfp_path if current_user.pfp_path is not none else 'default.jpg')}}"
+                                    src="{{'/static/assets/' + (current_user.pfp_path if current_user.pfp_path is not none else 'default.png')}}"
                                     height="40px">
                             </a>
                         </div>
@@ -68,7 +69,7 @@
                         <span class="visually-hidden">Toggle Dropdown</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuReference">
-                        <li><a class="dropdown-item" href="{{url_for('home.index')}}">Logout</a></li>
+                        <li><a class="dropdown-item" href="{{url_for('auth.logout')}}">Logout</a></li>
                     </ul>
                 </div>
             </div>

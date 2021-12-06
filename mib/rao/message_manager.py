@@ -143,10 +143,11 @@ class MessageManager:
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
+            senders = response.json()['senders']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, []
+            return 500, [], {}
 
-        return code,obj
+        return code,obj, senders
 
     @classmethod
     def retrieve_drafts(cls, id_usr: int) -> Tuple[int, List[Message]]:
@@ -154,14 +155,15 @@ class MessageManager:
         Returns the list of drafted messages by a specific user.
         """
         try:
-            url = "%s/message/list/drafted/%s" % (cls.message_endpoint(),str(id_usr))
+            url = "%s/message/list/draft/%s" % (cls.message_endpoint(),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
+            recipients = response.json()['recipients']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, []
+            return 500, [], {}
 
-        return code,obj
+        return code,obj,recipients
 
     @classmethod
     def retrieve_sent_messages(cls,id_usr: int, data: datetime = None) -> Tuple[int, List[Message]]:
@@ -179,10 +181,11 @@ class MessageManager:
             print(response.json())
             code = response.status_code
             obj = [Message.build_from_json(m) for m in response.json()['messages']]
+            recipients = response.json()['recipients']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, []
+            return 500, [], {}
 
-        return code,obj
+        return code,obj,recipients
 
     @classmethod
     def get_timeline_month(cls,id_usr: int, dt: datetime):
@@ -237,12 +240,25 @@ class MessageManager:
                 body_message = message.body_message
                 user_dict = users.get(id_user, None)
                 if user_dict is not None:
-                    _fn, _ln = user_dict.get('first_name', None), user_dict.get('last_name', None)
-                    user = _fn + ' ' + _ln if (_fn, _ln) != (None, None) else 'Anonymous'
-                    return ({
-                        "message": body_message,
-                        "user": user,
-                    })
+                    _user = {
+                        'id': id_user,
+                        'first_name': user_dict['first_name'],
+                        'last_name': user_dict['last_name'],
+                    }
+                else:
+                    _user = {
+                        'id': 0,
+                        'first_name': 'Anonymous',
+                        'last_name': '',
+                    }
+
+                return ({
+                    "message": {
+                        "body_message":  body_message,
+                        "delivery_date": message.delivery_date
+                    },
+                    "user": _user,
+                })
 
         return None
 

@@ -27,10 +27,10 @@ function set_sent_received(day, sent, received, ind) {
 
 function set_day_link(day, calendar, day_num) {
     day.querySelector(".day-link").href = 
-        "/timeline/day/" + 
-        calendar.year + "/" +
-        calendar.month + "/" + 
-        day_num + "/received";
+        "/message/list/received?" + 
+        "y=" + calendar.year + "&" +
+        "m=" + calendar.month + "&" + 
+        "d=" + day_num;
 }
 
 function populate_first_row(container, calendar){
@@ -113,36 +113,36 @@ function populate_last_row(container, calendar, day_num){
 function populate_month_nav(container, calendar) {
     container.querySelector(".next-button").onclick = function() { 
         location.href=
-            "/timeline/month/" + 
-            (calendar.month == 12 ? calendar.year + 1 : calendar.year) + "/" + 
-            (calendar.month == 12 ? 1 : calendar.month + 1); 
+            "/timeline?" + 
+            "y=" + (calendar.month == 12 ? calendar.year + 1 : calendar.year) + "&" + 
+            "m=" + (calendar.month == 12 ? 1 : calendar.month + 1); 
     };
     container.querySelector(".prev-button").onclick = function() { 
         location.href=
-            "/timeline/month/" + 
-            (calendar.month == 1 ? calendar.year - 1 : calendar.year) + "/" + 
-            (calendar.month == 1 ? 12 : calendar.month - 1); 
+            "/timeline?" + 
+            "y=" + (calendar.month == 1 ? calendar.year - 1 : calendar.year) + "&" + 
+            "m=" + (calendar.month == 1 ? 12 : calendar.month - 1); 
     };
     container.querySelector(".month-year-desc").textContent = calendar.month_name + " " + calendar.year;
 }
 
 function populate_day_nav(container, calendar, type) {
     container.querySelector(".next-button").onclick = function() { 
-        location.href="/timeline/day/" + 
-        calendar.tomorrow[0] + "/" + 
-        calendar.tomorrow[1] + "/" + 
-        calendar.tomorrow[2] + "/" + type;
+        location.href="/message/list/" + type + "?" + 
+        "y=" + calendar.tomorrow[0] + "&" + 
+        "m=" + calendar.tomorrow[1] + "&" + 
+        "d=" + calendar.tomorrow[2];
     };
     container.querySelector(".prev-button").onclick = function() { 
-        location.href="/timeline/day/" + 
-        calendar.yesterday[0] + "/" + 
-        calendar.yesterday[1] + "/" + 
-        calendar.yesterday[2] + "/" + type;
+        location.href="/message/list/" + type + "?" + 
+        "y=" + calendar.yesterday[0] + "&" + 
+        "m=" + calendar.yesterday[1] + "&" + 
+        "d=" + calendar.yesterday[2];
     };
     container.querySelector(".month-button").onclick = function() { 
-        location.href="/timeline/month/" + 
-        calendar.today[0] + "/" + 
-        calendar.today[1] 
+        location.href="/timeline?" + 
+        "y=" + calendar.today[0] + "&" + 
+        "m=" + calendar.today[1] 
     };
     container.querySelector(".date-desc").textContent = calendar.today[2] + "/" + calendar.today[1] + "/" + calendar.today[0];
 
