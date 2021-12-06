@@ -59,7 +59,7 @@ def read_messages(id):
         return redirect(url_for('messages.list_received_messages'))
 
     (msg, users, image) = obj
-    print('users', users)
+    print('image', image)
     
     return render_template(
         'read_message.html',
@@ -181,7 +181,7 @@ def list_received_messages():
     except (ValueError, TypeError):
         day_dt = None
         
-    code, obj, senders = MessageManager.retrieve_received_messages(current_user.id, data=day_dt)
+    code, obj, opened, senders = MessageManager.retrieve_received_messages(current_user.id, data=day_dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
@@ -195,10 +195,12 @@ def list_received_messages():
             'yesterday': (yesterday.year, yesterday.month, yesterday.day),
         }
 
+    print('opened', opened)
     return render_template(
         "mailbox.html",
         message_list=obj,
         senders=senders,
+        opened_dict=opened,
         calendar_view=calendar_view,
         list_type="received",
     )

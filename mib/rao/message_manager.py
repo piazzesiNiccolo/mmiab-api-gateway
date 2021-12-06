@@ -121,7 +121,8 @@ class MessageManager:
             _json = response.json()
             if code == 200:
                 msg = Message.build_from_json(_json['obj'])
-                users = _json['users']
+                _users = _json['users']
+                users = {int(k): v for k,v in _users.items()}
                 image = _json['image']
                 obj = (msg, users, image)
             message = response.json()['message']
@@ -144,12 +145,17 @@ class MessageManager:
 
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
-            obj = [Message.build_from_json(m) for m in response.json()['messages']]
-            senders = response.json()['senders']
+            if code == 200:
+                obj = [Message.build_from_json(m) for m in response.json()['messages']]
+                _senders = response.json()['senders']
+                senders = {int(k): v for k,v in _senders.items()}
+                opened = response.json()['has_opened']
+            else:
+                obj, senders, opened = [], {}, []
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, [], {}
+            return 500, [], [], {}
 
-        return code,obj, senders
+        return code, obj, opened, senders
 
     @classmethod
     def retrieve_drafts(cls, id_usr: int) -> Tuple[int, List[Message]]:
@@ -160,9 +166,12 @@ class MessageManager:
             url = "%s/message/list/draft/%s" % (cls.message_endpoint(),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
-            obj = [Message.build_from_json(m) for m in response.json()['messages']]
-            print('rao', obj)
-            recipients = response.json()['recipients']
+            if code == 200:
+                obj = [Message.build_from_json(m) for m in response.json()['messages']]
+                _recipients = response.json()['recipients']
+                recipients = {int(k): v for k,v in _recipients.items()}
+            else:
+                obj, recipients = [], {}
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, [], {}
 
@@ -183,8 +192,12 @@ class MessageManager:
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             print(response.json())
             code = response.status_code
-            obj = [Message.build_from_json(m) for m in response.json()['messages']]
-            recipients = response.json()['recipients']
+            if code == 200:
+                obj = [Message.build_from_json(m) for m in response.json()['messages']]
+                _recipients = response.json()['recipients']
+                recipients = {int(k): v for k,v in _recipients.items()}
+            else:
+                obj, recipients = [], {}
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, [], {}
 

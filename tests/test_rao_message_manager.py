@@ -168,14 +168,17 @@ class TestMessageManager:
         mock_get.return_value = MockResponse(code=200,json={
             "status":"success",
             "messages":[test_message_create] * 5,
-            "recipients":[],
+            "senders":{},
+            "has_opened": [],
             "images":[]
         })
-        code, obj = MessageManager.retrieve_received_messages(1, data=data)
+        code, obj, opened, senders = MessageManager.retrieve_received_messages(1, data=data)
         assert mock_get.called
         assert mock_get.call_args.args[0].endswith(endurl)
         assert code == 200
         assert len(obj) == 5
+        assert len(senders.keys()) == 0
+        assert len(opened) == 0
     
     @pytest.mark.parametrize("exception",[
         requests.exceptions.ConnectionError,
@@ -184,9 +187,11 @@ class TestMessageManager:
     def test_retrieve_received_messages_error(self, mock_get,exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
-        code, obj = MessageManager.retrieve_received_messages(1)
+        code, obj, opened, senders = MessageManager.retrieve_received_messages(1)
         assert code == 500
         assert obj == []
+        assert opened == []
+        assert senders == {}
         mock_get.reset_mock(side_effect=True)
     
     def test_post_draft(self, mock_post):
@@ -197,12 +202,13 @@ class TestMessageManager:
         mock_get.return_value = MockResponse(code=200,json={
             "status":"success",
             "messages":[test_message_create] * 5,
-            "recipients":[],
+            "recipients":{},
             "images":[]
         })
-        code, obj = MessageManager.retrieve_drafts(1)
+        code, obj, recipients = MessageManager.retrieve_drafts(1)
         assert code == 200
         assert len(obj) == 5
+        assert len(recipients.keys()) == 0
     
     @pytest.mark.parametrize("exception",[
         requests.exceptions.ConnectionError,
@@ -211,9 +217,10 @@ class TestMessageManager:
     def test_retrieve_drafts_error(self, mock_get,exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
-        code, obj = MessageManager.retrieve_drafts(1)
+        code, obj, recipients = MessageManager.retrieve_drafts(1)
         assert code == 500
         assert obj == []
+        assert recipients == {}
         mock_get.reset_mock(side_effect=True)
 
     @pytest.mark.parametrize("data, endurl", [
@@ -225,14 +232,15 @@ class TestMessageManager:
         mock_get.return_value = MockResponse(code=200,json={
             "status":"success",
             "messages":[test_message_create] * 5,
-            "recipients":[],
+            "recipients":{},
             "images":[]
         })
-        code, obj = MessageManager.retrieve_sent_messages(1, data=data)
+        code, obj, recipients = MessageManager.retrieve_sent_messages(1, data=data)
         assert mock_get.called
         assert mock_get.call_args.args[0].endswith(endurl)
         assert code == 200
         assert len(obj) == 5
+        assert len(recipients.keys()) == 0
     
     @pytest.mark.parametrize("exception",[
         requests.exceptions.ConnectionError,
@@ -241,9 +249,10 @@ class TestMessageManager:
     def test_get_sent_messages_error(self, mock_get,exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
-        code, obj = MessageManager.retrieve_sent_messages(1)
+        code, obj, recipients = MessageManager.retrieve_sent_messages(1)
         assert code == 500
         assert obj == []
+        assert recipients == {}
         mock_get.reset_mock(side_effect=True)
 
     def test_get_timeline_month(self, mock_get):

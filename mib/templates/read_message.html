@@ -48,7 +48,7 @@
                     <span class="m-1 ms-auto fw-bold fs-5 text-navy">from:</span>
                     <a href="{{url_for('users.user_info', id=message.id_sender)}}"
                         <span class="m-1 text-decoration-none badge rounded-pill bg-primary text-white fs-5">
-                            {% set sender = users[message.id_sender|string] %}
+                            {% set sender = users[message.id_sender] if message.id_sender in users else none %}
                             {% if sender is not none %}
                                 {{ sender['first_name'] }} {{ sender['last_name'] }}
                             {% else %}
@@ -63,8 +63,10 @@
         <div class="row justify-content-center mb-2">
             <div class="col-7">
                 <div class="shadow-sm rounded-3 text-navy fs-5">
-                    <!-- TODO: fix link -->
-                    <img class="rounded img-fluid" src="{{url_for('static', filename='assets/' + message.img_path)}}" alt="mess" >
+                    <img 
+                        class="rounded img-fluid" 
+                        src="data:image/{{ image['type'] }};base64,{{ image['data'] | safe }}"
+                        alt="mess" >
                 </div>
             </div>
         </div>
@@ -83,7 +85,7 @@
                     {% for rcp in message.recipients %}
                         <a href="{{url_for('users.user_info', id=rcp)}}"
                             <span class="m-1 text-decoration-none badge bg-primary text-white rounded-pill fs-5">
-                                {{ users[rcp|string]['first_name'] }} {{ users[rcp|string]['last_name'] }}
+                                {{ users[rcp]['first_name'] }} {{ users[rcp]['last_name'] }}
                             </span>
                         </a>
                     {% endfor %}

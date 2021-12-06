@@ -91,25 +91,25 @@
                            required></textarea>
                        <label for="message_body">Body</label>
                     </div>
-                    <div class="input-group mb-3">
-                        <div class="form-floating vstack">
-                            <input 
-                                id="delivery_date" 
-                                name="delivery_date" 
-                                type="text" 
-                                class="form-control" 
-                                placeholder="12:45 08/12/2021" 
-                                value="{{old_date|delivery_datetime_format if edit == True}}"
-                            >
-                            <label for="delivery_date">Delivery Date</label>
-                        </div>
-                        <span class="input-group-text">HH:MM dd/mm/yyyy</span>
+                    <div class="form-floating">
+                        <input 
+                            id="delivery_date" 
+                            name="delivery_date" 
+                            type="datetime-local" 
+                            class="form-control" 
+                            placeholder="2021-08-12T12:45"
+                            value="{{old_date|delivery_datetime_field_format if edit == True}}"
+                        >
+                        <label for="delivery_date">Delivery Date</label>
                     </div>
                     <div class="mb-3">
                         {% if edit == True and old_img is not none %}
                             <div class="text-center mb-3">
                                 <label for="old-img">Uploaded image<label>
-                                <img id="old-img" src="{{url_for('static',filename='assets/' + old_img)}}" alt="mess" class="img-fluid rounded">
+                                <img 
+                                    class="rounded img-fluid" 
+                                    src="data:image/{{ image['type'] }};base64,{{ image['data'] | safe }}"
+                                    alt="mess" >
                             </div>
                         {% endif %}
                         <label for="image" class="form-label">
