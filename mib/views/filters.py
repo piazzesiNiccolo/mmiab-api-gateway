@@ -18,6 +18,14 @@ def delivery_datetime_format(value, format="%H:%M %d/%m/%Y"):
     """
     return value.strftime(format) if value != None else ""
 
+@filters.app_template_filter()
+def delivery_datetime_field_format(value, format="%Y-%m-%dT%H:%M"):
+    """
+    filter used to properly format delivery date in html templates
+    """
+    return value.strftime(format) if value != None else ""
+
 
 filters.add_app_template_filter(datetime_format)
 filters.add_app_template_filter(delivery_datetime_format)
+filters.add_app_template_filter(delivery_datetime_field_format)

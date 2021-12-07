@@ -10,7 +10,7 @@ class Message:
         self.id_sender = id_sender
         self.message_body = message_body
         try:
-            dt = datetime.strptime(delivery_date, '%d/%m/%Y %H:%M')
+            dt = datetime.strptime(delivery_date, '%H:%M %d/%m/%Y')
             self.delivery_date = dt
         except (ValueError, TypeError):
             self.delivery_date = None

@@ -1,4 +1,5 @@
 from flask import Blueprint, redirect, render_template, url_for, flash, request
+from flask import jsonify
 from flask_login import (login_user, login_required)
 from flask_login import current_user
 
@@ -207,6 +208,13 @@ def report_user(id):
     else:
         flash("Unexpected response from users microservice!")
         return redirect(url_for('home.index'))
+
+@users.route("/recipients", methods=['GET'])
+@login_required
+def get_recipients():
+    query = request.args.get('q', None)
+    recipients = UserManager.get_recipients(current_user.id, query=query)
+    return jsonify(recipients=recipients)
 
 
 
