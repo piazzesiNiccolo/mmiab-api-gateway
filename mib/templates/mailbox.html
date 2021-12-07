@@ -154,8 +154,8 @@
                 {% else %}
                     {% set message_url = url_for('messages.read_messages', id=m.id_message) %}
                     {% set user_url = url_for('users.user_info', id=m.id_sender) %}
-                    {% set firstname = senders[m.id_sender]['first_name'] %}
-                    {% set lastname = senders[m.id_sender]['last_name'] %}
+                    {% set firstname = senders[m.id_sender]['first_name'] if m.id_sender in senders else 'Anonymous' %}
+                    {% set lastname = senders[m.id_sender]['last_name']  if m.id_sender in senders else ''%}
                     {% set message_body = m.message_body %}
                     {% set datetime_list = (m.delivery_date|delivery_datetime_format).split(' ') %}
                     {% set id_message = m.id_message %}
@@ -173,8 +173,8 @@
                                           <div class="hstack user-stack">
                                             {% if list_type != 'received' %}
                                                 {% for recipient in m.recipients %}
-                                                    {% set firstname = recipients[recipient]['first_name'] %}
-                                                    {% set lastname = recipients[recipient]['last_name'] %}
+                                                    {% set firstname = recipients[recipient]['first_name'] if recipient in recipients else 'Anonymous'%}
+                                                    {% set lastname = recipients[recipient]['last_name'] if recipient in recipients else ''%}
                                                     {% set user_url = url_for('users.user_info', id=recipient) %}
                                                       <a href="{{ user_url }}">
                                                           <span class="badge rounded-pill bg-primary text-white fs-5 m-1 user">
