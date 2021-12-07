@@ -357,18 +357,18 @@ class TestMessageManager:
         (1, None, None),
         (
             1, 
-            (Message(body_message='test'), {}, None), 
-            {'message': {'body_message': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+            (Message(message_body='test'), {}, None), 
+            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
         ),
         (
             1, 
-            (Message(body_message='test'), {2: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
-            {'message': {'body_message': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+            (Message(message_body='test'), {2: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
+            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
         ),
         (
             1, 
-            (Message(body_message='test'), {1: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
-            {'message': {'body_message': 'test', 'delivery_date': None}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
+            (Message(message_body='test'), {1: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
+            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
         ),
     ])
     def test_get_replying_info(self, id_message, retval, res):

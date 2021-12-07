@@ -110,6 +110,32 @@ class MessageManager:
 
         return code, message
 
+    @classmethod
+    def reply_to_message(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/message/reply/{id_message}/{id_user}'
+        try:
+            response = requests.post(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+        except:
+            return 500, "Unexpected response from messages microservice!"
+
+        return code, message
+
+    @classmethod
+    def forward_message(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/message/forward/{id_message}/{id_user}'
+        try:
+            response = requests.post(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+            obj = None
+            if code == 200:
+                obj = Message.build_from_json(response.json()['obj'])
+        except:
+            return 500, None, "Unexpected response from messages microservice!"
+
+        return code, obj, message
 
     @classmethod
     def get_message(cls, id_mess: int, id_usr: int) -> Tuple[int, Message, str]:
@@ -267,7 +293,7 @@ class MessageManager:
             _, obj, _ = cls.get_message(id_message, id_user)
             if obj != None:
                 message, users, _ = obj
-                body_message = message.body_message
+                message_body = message.message_body
                 user_dict = users.get(id_user, None)
                 if user_dict is not None:
                     _user = {
@@ -284,7 +310,7 @@ class MessageManager:
 
                 return ({
                     "message": {
-                        "body_message":  body_message,
+                        "message_body":  message_body,
                         "delivery_date": message.delivery_date
                     },
                     "user": _user,
