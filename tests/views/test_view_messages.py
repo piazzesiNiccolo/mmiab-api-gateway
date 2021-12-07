@@ -79,7 +79,7 @@ class TestViewMessages:
                 }
         response = test_client.post("/draft", data=data, follow_redirects=True)
         assert response.status_code == 200
-    ''''
+        
     @pytest.mark.parametrize('code, obj', [
         (200, (Message(id_sender=1,is_sent=False,is_arrived=False, body_message='test body'),\
             {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
@@ -149,7 +149,6 @@ class TestViewMessages:
                 assert response.status_code == 401
             else:
                 assert response.status_code == 200
-    '''
 
     @pytest.mark.parametrize('code, obj', [
         (200, (11,'june',30,4,[],[])),
