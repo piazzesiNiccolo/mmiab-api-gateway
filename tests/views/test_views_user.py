@@ -265,3 +265,10 @@ class TestViewsUsers:
             resp = test_client.get("/report/1")
             assert message in get_flashed_messages()
             assert resp.status_code == 302
+
+    @pytest.mark.parametrize('query', ['', '?q=abc'])
+    def test_get_recipients(self, test_client, mock_current_user, query):
+        with mock.patch('mib.rao.user_manager.UserManager.get_recipients') as m:
+            m.return_value = {}
+            response = test_client.get('/recipients' + query)
+            assert response.status_code == 200

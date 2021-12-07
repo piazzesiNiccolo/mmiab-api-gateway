@@ -364,15 +364,21 @@ class TestUserManager:
         assert _blocked == False
         assert _reported == False
 
-    def test_get_recipients(self, mock_get):
-        mock_get.reset_mock(side_effect=True)
-        mock_get.return_value = MockResponse(json={
-            "users":[{"id":1,"nickname":"nick1","email":"email@email.com"},
-            {"id":2,"nickname":None,"email":"email1@email1.com"}
+    @pytest.mark.parametrize("code, json, res", [
+        (200, {
+            "users":[
+                {"id":1,"nickname":"nick1","email":"email@email.com"},
+                {"id":2,"nickname":None,"email":"email1@email1.com"}
             ]
-        })
+        }, [(1,"nick1"),(2,"email1@email1.com")]),
+        (404, {}, []),
+    ])
+    def test_get_recipients(self, mock_get, code, json, res):
+        mock_get.reset_mock(side_effect=True)
+        mock_get.return_value = MockResponse(code=code, json=json)
         recipients = UserManager.get_recipients(1)
-        assert recipients == [(1,"nick1"),(2,"email1@email1.com")]
+        assert recipients == res
+        
     @pytest.mark.parametrize("exc",[
         requests.ConnectionError,
         requests.ConnectTimeout

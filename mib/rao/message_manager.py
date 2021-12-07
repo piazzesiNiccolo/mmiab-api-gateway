@@ -230,7 +230,7 @@ class MessageManager:
                 form_data[k] = [int(rf['recipient']) for rf in form_data[k]]
             elif k == "image":
                 file = form_data["image"]
-                b64_file = base64.b64encode(file.read()).decode("utf8")
+                b64_file = base64.b64encode(file.read()).decode("utf-8")
 
                 form_data[k] =  {
                     'name': file.filename,
@@ -239,9 +239,10 @@ class MessageManager:
             elif k == 'delivery_date':
                 try:
                     form_data[k] = form_data[k].strftime('%H:%M %d/%m/%Y')
-                except (ValueError, TypeError):
-                    del form_data[k]
+                except AttributeError:
+                    form_data[k] = None
         form_data['id_sender'] = id_sender
+        return {k:v for k,v in form_data.items() if v is not None}
 
     @classmethod
     def post_draft(cls, form_data: dict, id_sender: int):
@@ -255,11 +256,9 @@ class MessageManager:
             if code == 201:
                 id_message = response.json()['id_message']
 
-            print(response.json())
-
-            return response.status_code, id_message
+            return code, id_message
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected response from messages microservice!"
+            return 500, None
 
     @classmethod
     def get_replying_info(cls, id_message: int, id_user: int):
