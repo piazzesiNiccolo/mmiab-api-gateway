@@ -152,15 +152,14 @@ class TestViewMessages:
     '''
 
     @pytest.mark.parametrize('code, obj', [
-        (200, (Message(id_sender=1,is_sent=True,is_arrived=True, body_message='test body'),\
-            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
-        (401, (None, {}, {})),
+        (200, (11,'june',30,4,[],[])),
     ])
     def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
         with mock.patch('mib.rao.message_manager.MessageManager.get_timeline_month') as m:
-            m.return_value = code, obj, {}
-            response = test_client.get('/timeline?y=2021&m=01')
+            m.return_value = code, obj
+            response = test_client.get('/timeline?y=2021&m=11')
             if code != 200:
                 assert response.status_code == 401
             else:
                 assert response.status_code == 200
+
