@@ -190,7 +190,7 @@
                     <span class="m-1 ms-auto fw-bold fs-5 text-navy">replying to:</span>
                     <a href="{{url_for('users.user_info', id=replying_info['user'].id)}}"
                         <span class="m-1 text-decoration-none badge bg-primary text-white rounded-pill fs-5">
-                            {{ replying_info['user'].firstname }} {{ replying_info['user'].lastname }}
+                            {{ replying_info['user']['first_name'] }} {{ replying_info['user']['last_name'] }}
                         </span>
                     </a>
                 </div>
