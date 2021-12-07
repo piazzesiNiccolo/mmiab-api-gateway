@@ -27,18 +27,19 @@ class MessageManager:
     def requests_timeout_seconds(cls):
         return app.config['REQUESTS_TIMEOUT_SECONDS']
 
-    '''
-    @classmethod
-    def get_message(cls, id_message, id_user) -> Tuple[int, str]:
+    
+    '''@classmethod
+    def get_message(cls, id_message, id_user):
 
         endpoint = '%s/message/%s/%s' % (cls.message_endpoint(cls), str(id_message), str(id_user))
         try:
             response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()
+            print("message" + message)
             return response.status_code, message
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected reponse from user microservice"
-    '''
+            return 500, None'''
+    
 
     @classmethod
     def send_message(cls, id_message: int, id_user: int) -> Tuple[int, str]:
@@ -292,3 +293,15 @@ class MessageManager:
 
         return None
 
+    @classmethod
+    def put_draft(cls, form_data: dict, id_sender: int, id_message: int):
+
+        cls.format_draft_data(form_data, id_sender)
+        try:
+            url = "%s/draft/%s/%s" % (cls.message_endpoint(), str(id_message), str(id_sender))
+            response = requests.put(url, json=form_data, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+
+            return code
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return 500
