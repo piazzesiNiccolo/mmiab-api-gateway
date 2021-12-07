@@ -7,6 +7,7 @@ from wtforms.validators import DataRequired
 from wtforms.validators import Email
 from wtforms.validators import InputRequired
 from wtforms.validators import Optional
+from wtforms.fields.html5 import DateTimeLocalField
 
 _MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
@@ -20,8 +21,8 @@ class RecipientForm(FlaskForm):
 
 class EditMessageForm(FlaskForm):
     message_body = f.TextAreaField("Message", validators=[InputRequired()])
-    delivery_date = f.DateTimeField(
-        "Delivery Date", format=delivery_format, validators=[Optional()]
+    delivery_date = DateTimeLocalField(
+        "Delivery Date", format='%Y-%m-%dT%H:%M', validators=[Optional()]
     )
     recipients = f.FieldList(f.FormField(RecipientForm))
     display = ["message_body", "delivery_date", "recipients"]

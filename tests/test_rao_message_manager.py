@@ -1,9 +1,13 @@
+import io
 from datetime import datetime
 import mock
+import base64
 import requests
+from werkzeug.datastructures import FileStorage
 from testing.fake_response import MockResponse
 from mib.rao.message_manager import MessageManager
 from mib.rao.message import Message
+from mib.forms.draft import EditMessageForm
 import pytest
 
 test_message_create = {
@@ -158,24 +162,29 @@ class TestMessageManager:
         assert message == "Unexpected response from messages microservice!"
     
     
-    @pytest.mark.parametrize("data, endurl", [
-        (None, "/1"),
-        (datetime(2022,10,10), "/1?y=2022&m=10&d=10"),
+    @pytest.mark.parametrize("code, data, endurl, messages", [
+        (200, None, "/1", [test_message_create] * 5),
+        (404, None, "/1", []),
+        (400, None, "/1", []),
+        (200, datetime(2022,10,10), "/1?y=2022&m=10&d=10", [test_message_create] * 3),
     ])
-    def test_retrieve_received_messages(self, mock_get, data, endurl):
+    def test_retrieve_received_messages(self, mock_get, code, data, endurl, messages):
         mock_get.reset_mock(side_effect=True)
 
-        mock_get.return_value = MockResponse(code=200,json={
+        mock_get.return_value = MockResponse(code=code, json={
             "status":"success",
-            "messages":[test_message_create] * 5,
-            "recipients":[],
+            "messages": messages,
+            "senders":{},
+            "has_opened": [],
             "images":[]
         })
-        code, obj = MessageManager.retrieve_received_messages(1, data=data)
+        _code, obj, opened, senders = MessageManager.retrieve_received_messages(1, data=data)
         assert mock_get.called
         assert mock_get.call_args.args[0].endswith(endurl)
-        assert code == 200
-        assert len(obj) == 5
+        assert _code == code
+        assert len(obj) == len(messages)
+        assert len(senders.keys()) == 0
+        assert len(opened) == 0
     
     @pytest.mark.parametrize("exception",[
         requests.exceptions.ConnectionError,
@@ -184,25 +193,31 @@ class TestMessageManager:
     def test_retrieve_received_messages_error(self, mock_get,exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
-        code, obj = MessageManager.retrieve_received_messages(1)
+        code, obj, opened, senders = MessageManager.retrieve_received_messages(1)
         assert code == 500
         assert obj == []
+        assert opened == []
+        assert senders == {}
         mock_get.reset_mock(side_effect=True)
     
-    def test_post_draft(self, mock_post):
-        pass
-    def test_retrieve_drafts(self, mock_get):
+    @pytest.mark.parametrize("code, messages", [
+        (200, [test_message_create] * 5),
+        (404, []),
+        (400, []),
+    ])
+    def test_retrieve_drafts(self, mock_get, code, messages):
         mock_get.reset_mock(side_effect=True)
 
-        mock_get.return_value = MockResponse(code=200,json={
+        mock_get.return_value = MockResponse(code=code,json={
             "status":"success",
-            "messages":[test_message_create] * 5,
-            "recipients":[],
+            "messages": messages,
+            "recipients":{},
             "images":[]
         })
-        code, obj = MessageManager.retrieve_drafts(1)
-        assert code == 200
-        assert len(obj) == 5
+        _code, obj, recipients = MessageManager.retrieve_drafts(1)
+        assert _code == code
+        assert len(obj) == len(messages)
+        assert len(recipients.keys()) == 0
     
     @pytest.mark.parametrize("exception",[
         requests.exceptions.ConnectionError,
@@ -211,28 +226,32 @@ class TestMessageManager:
     def test_retrieve_drafts_error(self, mock_get,exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
-        code, obj = MessageManager.retrieve_drafts(1)
+        code, obj, recipients = MessageManager.retrieve_drafts(1)
         assert code == 500
         assert obj == []
+        assert recipients == {}
         mock_get.reset_mock(side_effect=True)
 
-    @pytest.mark.parametrize("data, endurl", [
-        (None, "/1"),
-        (datetime(2022,10,10), "/1?y=2022&m=10&d=10"),
+    @pytest.mark.parametrize("code, data, endurl, messages", [
+        (200, None, "/1", [test_message_create] * 5),
+        (404, None, "/1", []),
+        (400, None, "/1", []),
+        (200, datetime(2022,10,10), "/1?y=2022&m=10&d=10", [test_message_create] * 3),
     ])
-    def test_retrieve_sent_messages(self, mock_get, data, endurl):
+    def test_retrieve_sent_messages(self, mock_get, code, data, endurl, messages):
         mock_get.reset_mock(side_effect=True)
-        mock_get.return_value = MockResponse(code=200,json={
+        mock_get.return_value = MockResponse(code=code,json={
             "status":"success",
-            "messages":[test_message_create] * 5,
-            "recipients":[],
+            "messages": messages,
+            "recipients":{},
             "images":[]
         })
-        code, obj = MessageManager.retrieve_sent_messages(1, data=data)
+        _code, obj, recipients = MessageManager.retrieve_sent_messages(1, data=data)
         assert mock_get.called
         assert mock_get.call_args.args[0].endswith(endurl)
-        assert code == 200
-        assert len(obj) == 5
+        assert _code == code
+        assert len(obj) == len(messages)
+        assert len(recipients.keys()) == 0
     
     @pytest.mark.parametrize("exception",[
         requests.exceptions.ConnectionError,
@@ -241,9 +260,10 @@ class TestMessageManager:
     def test_get_sent_messages_error(self, mock_get,exception):
         mock_get.reset_mock(side_effect=True)
         mock_get.side_effect = exception()
-        code, obj = MessageManager.retrieve_sent_messages(1)
+        code, obj, recipients = MessageManager.retrieve_sent_messages(1)
         assert code == 500
         assert obj == []
+        assert recipients == {}
         mock_get.reset_mock(side_effect=True)
 
     def test_get_timeline_month(self, mock_get):
@@ -276,6 +296,61 @@ class TestMessageManager:
         assert code == 500
         assert timeline == None
         mock_get.reset_mock(side_effect=True)
+
+    def test_form_to_dict(self):
+        form = EditMessageForm()
+        dict = MessageManager.form_to_dict(form)
+        assert dict == {'recipients': []}
+
+    @pytest.mark.parametrize("date", (datetime(2021, 10, 10, hour=10, minute=10), None))
+    def test_format_draft_data(self, date):
+        with mock.patch.object(FileStorage, "save", autospec=True, return_value=None):
+            file = FileStorage(filename="test.png", stream=io.BytesIO(b"data data"))
+            dict = {
+                'message_body': 'test',
+                'recipients': [{'recipient': '1'}, {'recipient': '2'}],
+                'delivery_date': date,
+                'image': file,
+            }
+            res = MessageManager.format_draft_data(dict, 3)
+            assert res['id_sender'] == 3
+            assert res['message_body'] == 'test'
+            assert res['recipients'] == [1,2]
+            assert base64.b64decode(res['image']['data'].encode("utf-8")) == b'data data'
+
+    @pytest.mark.parametrize("code, dict", [
+        (201, {"id_message": 3}),
+        (404, {}),
+    ])
+    def test_post_draft(self, mock_post, code, dict):
+        mock_post.reset_mock(side_effect=True)
+        mock_post.return_value = MockResponse(code=code, json=dict)
+        
+        _code, _id = MessageManager.post_draft({}, 1)
+        assert _code == code
+        assert _id == (3 if _code == 201 else None)
+
+    @pytest.mark.parametrize("exception", [
+        requests.exceptions.ConnectTimeout,
+        requests.exceptions.Timeout,
+    ])
+    def test_post_draft_error(self, mock_post, exception):
+        mock_post.reset_mock(side_effect=True)
+        mock_post.side_effect = exception()
+        
+        _code, _id = MessageManager.post_draft({}, 1)
+        assert _code == 500
+        assert _id == None
+
+
+
+
+
+
+
+
+
+
 
     @pytest.mark.parametrize('id_message, retval, res', [
         (None, None, None),

@@ -1,5 +1,6 @@
 from mib.rao.message import Message
 import pytest 
+from datetime import datetime
 
 class TestRaoMessage:
     @pytest.mark.parametrize("date_val",[ 
@@ -20,6 +21,7 @@ class TestRaoMessage:
         m = Message(
             id_message=1,
             id_sender=1,
+            delivery_date="10:00 02/12/2007",
             message_body="foo",
             extra_val="val")
         assert m.__getattr__("message_body") == "foo"

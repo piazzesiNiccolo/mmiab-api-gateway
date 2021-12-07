@@ -121,7 +121,8 @@ class MessageManager:
             _json = response.json()
             if code == 200:
                 msg = Message.build_from_json(_json['obj'])
-                users = _json['users']
+                _users = _json['users']
+                users = {int(k): v for k,v in _users.items()}
                 image = _json['image']
                 obj = (msg, users, image)
             message = response.json()['message']
@@ -144,12 +145,17 @@ class MessageManager:
 
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
-            obj = [Message.build_from_json(m) for m in response.json()['messages']]
-            senders = response.json()['senders']
+            if code == 200:
+                obj = [Message.build_from_json(m) for m in response.json()['messages']]
+                _senders = response.json()['senders']
+                senders = {int(k): v for k,v in _senders.items()}
+                opened = response.json()['has_opened']
+            else:
+                obj, senders, opened = [], {}, []
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, [], {}
+            return 500, [], [], {}
 
-        return code,obj, senders
+        return code, obj, opened, senders
 
     @classmethod
     def retrieve_drafts(cls, id_usr: int) -> Tuple[int, List[Message]]:
@@ -160,9 +166,12 @@ class MessageManager:
             url = "%s/message/list/draft/%s" % (cls.message_endpoint(),str(id_usr))
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             code = response.status_code
-            obj = [Message.build_from_json(m) for m in response.json()['messages']]
-            print('rao', obj)
-            recipients = response.json()['recipients']
+            if code == 200:
+                obj = [Message.build_from_json(m) for m in response.json()['messages']]
+                _recipients = response.json()['recipients']
+                recipients = {int(k): v for k,v in _recipients.items()}
+            else:
+                obj, recipients = [], {}
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, [], {}
 
@@ -183,8 +192,12 @@ class MessageManager:
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
             print(response.json())
             code = response.status_code
-            obj = [Message.build_from_json(m) for m in response.json()['messages']]
-            recipients = response.json()['recipients']
+            if code == 200:
+                obj = [Message.build_from_json(m) for m in response.json()['messages']]
+                _recipients = response.json()['recipients']
+                recipients = {int(k): v for k,v in _recipients.items()}
+            else:
+                obj, recipients = [], {}
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, [], {}
 
@@ -217,7 +230,7 @@ class MessageManager:
                 form_data[k] = [int(rf['recipient']) for rf in form_data[k]]
             elif k == "image":
                 file = form_data["image"]
-                b64_file = base64.b64encode(file.read()).decode("utf8")
+                b64_file = base64.b64encode(file.read()).decode("utf-8")
 
                 form_data[k] =  {
                     'name': file.filename,
@@ -226,9 +239,10 @@ class MessageManager:
             elif k == 'delivery_date':
                 try:
                     form_data[k] = form_data[k].strftime('%H:%M %d/%m/%Y')
-                except (ValueError, TypeError):
-                    del form_data[k]
+                except AttributeError:
+                    form_data[k] = None
         form_data['id_sender'] = id_sender
+        return {k:v for k,v in form_data.items() if v is not None}
 
     @classmethod
     def post_draft(cls, form_data: dict, id_sender: int):
@@ -242,11 +256,9 @@ class MessageManager:
             if code == 201:
                 id_message = response.json()['id_message']
 
-            print(response.json())
-
-            return response.status_code, id_message
+            return code, id_message
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected response from messages microservice!"
+            return 500, None
 
     @classmethod
     def get_replying_info(cls, id_message: int, id_user: int):

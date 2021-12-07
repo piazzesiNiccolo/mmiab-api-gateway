@@ -11,7 +11,6 @@ notifications = Blueprint('notifications', __name__)
 @login_required
 def get_notifications():
     code, data = NotificationManager.get_notifications(current_user.id)
-    print('status_code:', code)
     if code == 200:
         return jsonify(notifications={
             "status_code" : 200,
