@@ -112,6 +112,7 @@ def list_drafts():
         #return redirect(url_for('mai'))
         #return mailbox
 
+    print('message_list', messages)
     return render_template(
         "mailbox.html",
         message_list=messages,
@@ -196,6 +197,7 @@ def list_received_messages():
         }
 
     print('opened', opened)
+    print('senders', senders)
     return render_template(
         "mailbox.html",
         message_list=obj,
@@ -240,7 +242,7 @@ def get_timeline_month():
 
     first_day, number_of_days = calendar.monthrange(dt.year, dt.month)
 
-    code , timeline = MessageManager.get_timeline_month(current_user.id, dt)
+    code, timeline = MessageManager.get_timeline_month(current_user.id, dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
         return redirect(url_for('messages.list_received_messages'))

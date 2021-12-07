@@ -1,8 +1,10 @@
 import pytest
 import mock
 import flask
+from datetime import datetime
 from flask import session
 from mib.rao.message import Message
+from mib.rao.timeline import Timeline
 
 class TestViewMessages:
 
@@ -80,85 +82,108 @@ class TestViewMessages:
         response = test_client.post("/draft", data=data, follow_redirects=True)
         assert response.status_code == 200
         
-    @pytest.mark.parametrize('code, obj', [
-        (200, (Message(id_sender=1,is_sent=False,is_arrived=False, body_message='test body'),\
-            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
-        (401, (None, {}, {})),
+    @pytest.mark.parametrize('code, obj, recipients', [
+        (
+            200, 
+            [Message(id_message=1, id_sender=1,is_sent=False,is_arrived=False, body_message='test body')],
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, 
+        ),
+        (401, [], {}),
     ])
-    def test_list_drafts(self, test_client, mock_current_user, code, obj):
+    def test_list_drafts(self, test_client, mock_current_user, code, obj, recipients):
         with mock.patch('mib.rao.message_manager.MessageManager.retrieve_drafts') as m:
-            m.return_value = code, obj, {}
+            m.return_value = code, obj, recipients
             response = test_client.get('/message/list/draft')
+            assert response.status_code == 200
             if code != 200:
-                assert response.status_code == 401
-            else:
-                assert response.status_code == 200
+                assert "Unexpected response from messages microservice!" in flask.get_flashed_messages()
 
-    @pytest.mark.parametrize('code, obj', [
-        (200, (Message(id_sender=1,is_sent=True, body_message='test body'),\
-            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
-        (401, (None, {}, {})),
+    @pytest.mark.parametrize('code, obj, recipients', [
+        (
+            200, 
+            [Message(id_message=1, id_sender=1,is_sent=True, body_message='test body')],
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, 
+        ),
+        (401, [], {}),
     ])
-    def test_list_sent_messages(self, test_client, mock_current_user, code, obj):
+    def test_list_sent_messages(self, test_client, mock_current_user, code, obj, recipients):
         with mock.patch('mib.rao.message_manager.MessageManager.retrieve_sent_messages') as m:
-            m.return_value = code, obj, {}
+            m.return_value = code, obj, recipients
             response = test_client.get('/message/list/sent')
+            assert response.status_code == 200
             if code != 200:
-                assert response.status_code == 401
-            else:
-                assert response.status_code == 200
+                assert "Unexpected response from messages microservice!" in flask.get_flashed_messages()
 
-    @pytest.mark.parametrize('code, obj', [
-        (200, (Message(id_sender=1,is_sent=True, body_message='test body'),\
-            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
-        (401, (None, {}, {})),
+    @pytest.mark.parametrize('code, obj, recipients', [
+        (
+            200, 
+            [Message(id_message=1, id_sender=1,is_sent=True, body_message='test body')],
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}
+        ),
+        (401, [], {}),
     ])
-    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
+    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj, recipients):
         with mock.patch('mib.rao.message_manager.MessageManager.retrieve_sent_messages') as m:
-            m.return_value = code, obj, {}
+            m.return_value = code, obj, recipients
             response = test_client.get('/message/list/sent?y=2021&m=01&d=01')
+            assert response.status_code == 200
             if code != 200:
-                assert response.status_code == 401
-            else:
-                assert response.status_code == 200
+                assert "Unexpected response from messages microservice!" in flask.get_flashed_messages()
 
-    @pytest.mark.parametrize('code, obj', [
-        (200, (Message(id_sender=1,is_sent=True, is_arrived=True, body_message='test body'),\
-            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
-        (401, (None, {}, {})),
+    @pytest.mark.parametrize('code, obj, opened, senders', [
+        (
+            200, 
+            [Message(id_message=1, id_sender=1,is_sent=True, is_arrived=True, body_message='test body')],
+            [False],
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}
+        ),
+        (401, [], [], {}),
     ])
-    def test_list_sent_messages(self, test_client, mock_current_user, code, obj):
+    def test_list_received_messages(self, test_client, mock_current_user, code, obj, opened, senders):
         with mock.patch('mib.rao.message_manager.MessageManager.retrieve_received_messages') as m:
-            m.return_value = code, obj, {}
+            m.return_value = code, obj, opened, senders
             response = test_client.get('/message/list/received')
+            assert response.status_code == 200
             if code != 200:
-                assert response.status_code == 401
-            else:
-                assert response.status_code == 200
+                assert "Unexpected response from messages microservice!" in flask.get_flashed_messages()
 
-    @pytest.mark.parametrize('code, obj', [
-        (200, (Message(id_sender=1,is_sent=True,is_arrived=True, body_message='test body'),\
-            {1: {'first_name': 'fn', 'last_name': 'ln'}}, {})),
-        (401, (None, {}, {})),
+    @pytest.mark.parametrize('code, obj, opened, senders', [
+        (
+            200, 
+            [Message(id_message=1, id_sender=1,is_sent=True,is_arrived=True, body_message='test body')],
+            [False],
+            {1: {'first_name': 'fn', 'last_name': 'ln'}}, 
+        ),
+        (401, [], [], {}),
     ])
-    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
+    def test_list_received_messages_timeline(self, test_client, mock_current_user, code, obj, opened, senders):
         with mock.patch('mib.rao.message_manager.MessageManager.retrieve_received_messages') as m:
-            m.return_value = code, obj, {}
+            m.return_value = code, obj, opened, senders
             response = test_client.get('/message/list/received?y=2021&m=01&d=01')
+            assert response.status_code == 200
             if code != 200:
-                assert response.status_code == 401
-            else:
-                assert response.status_code == 200
+                assert "Unexpected response from messages microservice!" in flask.get_flashed_messages()
 
-    @pytest.mark.parametrize('code, obj', [
-        (200, (11,'june',30,4,[],[])),
+    @pytest.mark.parametrize('url, code, obj', [
+        (
+            '?y=2021&m=11',
+            200, 
+            Timeline(sent=[0]*31, received=[0]*31, year=2021, month=11)
+        ),
+        (
+            '',
+            200, 
+            Timeline(sent=[0]*31, received=[0]*31, year=datetime.today().year, month=datetime.today().month)
+        ),
+        ('', 404, None),
     ])
-    def test_list_sent_messages_timeline(self, test_client, mock_current_user, code, obj):
+    def test_list_timeline(self, test_client, mock_current_user, url, code, obj):
         with mock.patch('mib.rao.message_manager.MessageManager.get_timeline_month') as m:
             m.return_value = code, obj
-            response = test_client.get('/timeline?y=2021&m=11')
+            response = test_client.get('/timeline' + url)
             if code != 200:
-                assert response.status_code == 401
+                assert "Unexpected response from messages microservice!" in flask.get_flashed_messages()
+                assert response.status_code == 302
             else:
                 assert response.status_code == 200
 
