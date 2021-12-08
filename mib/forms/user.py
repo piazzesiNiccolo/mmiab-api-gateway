@@ -25,7 +25,7 @@ class UserForm(FlaskForm):
     )
     first_name = f.StringField( 'First Name', validators=[DataRequired()])
     last_name = f.StringField( 'Last Name', validators=[DataRequired()])
-    password = f.PasswordField( 'Password', validators=[DataRequired()])
+    password = f.PasswordField( 'Password', validators=[DataRequired(), Length(min=5,max=127,message="Password must be between 5 and 127 characters")])
     # birthdate = DateField('Birthdate', format="%d/%m/%Y", validators=[AgeValidator(min_age=13)])
     birthdate = DateField('Birthdate', validators=[AgeValidator(min_age=13)])
     nickname = f.StringField("Nickname", validators=[Optional()])
@@ -41,7 +41,7 @@ class UserForm(FlaskForm):
             FileSize(max_size=16*1024*1024, message="max size allowed=16 MB"),
         ],
     )
-    phone = TelField( 'Phone', validators=[DataRequired()])
+    phone = TelField( 'Phone', validators=[DataRequired(), Length(min=10, max=25, "Phone number must be between 10 and 25 digits")])
 
     display = [
         "email",
