@@ -1,3 +1,4 @@
+from flask.helpers import get_flashed_messages
 import pytest
 import mock
 import flask
@@ -262,14 +263,21 @@ class TestViewMessages:
                     assert response.status_code == (302 if validate else 200)
                     if code != 201:
                         assert "Something went wrong while creating a new draft"
-
-    def test_get_draft_edit(self, test_client, mock_current_user):
+    
+    @pytest.mark.parametrize("gmcode,message",[
+        (500, "Unexpected response from message microservice!"),
+        (200,'')])
+    def test_get_draft_edit(self, test_client, mock_current_user, gmcode, message):
         with mock.patch('mib.rao.user_manager.UserManager.get_recipients') as mrcp:
             with mock.patch('mib.rao.message_manager.MessageManager.get_message') as gm:
-                gm.return_value = 200, (Message(), {}, {}, None), ''
+                gm.return_value = gmcode, (Message(), {}, {}, None), message
                 mrcp.return_value = [(2, 'fra')]
                 response = test_client.get("/draft/1/edit")
-                assert response.status_code == 200
+                if gmcode == 500:
+                    assert message in get_flashed_messages()
+                    assert response.status_code == 302
+                else:
+                    assert response.status_code == 200
 
     @pytest.mark.parametrize('url, code, obj', [
         (
