@@ -230,7 +230,7 @@ class TestMessageManager:
             "status":"success",
             "messages": messages,
             "senders":{},
-            "has_opened": [],
+            "has_opened": {},
             "images":[]
         })
         _code, obj, opened, senders = MessageManager.retrieve_received_messages(1, data=data)

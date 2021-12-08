@@ -178,7 +178,8 @@ class MessageManager:
                 obj = [Message.build_from_json(m) for m in response.json()['messages']]
                 _senders = response.json()['senders']
                 senders = {int(k): v for k,v in _senders.items()}
-                opened = response.json()['has_opened']
+                _opened = response.json()['has_opened']
+                opened = {int(k):v for k,v in _opened.items()}
             else:
                 obj, senders, opened = [], {}, []
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
