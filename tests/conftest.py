@@ -1,6 +1,8 @@
 import flask_login
 import pytest
 import mock
+from flask import render_template
+
 from mib import create_app
 from mib.auth.user import User
 @pytest.fixture(scope="session", autouse=True)
