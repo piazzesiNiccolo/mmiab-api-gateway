@@ -64,9 +64,7 @@ class TestViewsLottery:
                 assert resp.status_code == 200
                 b"You have already played with number 14" in resp.data
             elif code == 404:
-                assert resp.status_code == 200
-                assert b"Choose a number between 1 and 50" in resp.data
-
+                assert resp.status_code == 302
             else:
                 assert choice in get_flashed_messages()
                 assert resp.status_code == 302

@@ -93,14 +93,7 @@ def next_lottery():
             choice=choice,
         )
     elif code == 404:
-        form = LotteryForm()
-        return render_template(
-            "lottery.html",
-            date=next_lottery_date(),
-            is_participating=False,
-            form=form,
-        )
+        return redirect(url_for("lottery.participate"))
     else:
         flash(choice) # a bit confusing maybe, but choice becomes an error message when a timeout occurs
         return redirect(url_for("lottery.participate"))
-    
