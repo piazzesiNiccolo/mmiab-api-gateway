@@ -78,13 +78,14 @@ def read_messages(id):
         flash(message)
         return redirect(url_for('messages.list_received_messages'))
 
-    (msg, users, image) = obj
+    (msg, users, image, replying_info) = obj
     
     return render_template(
         'read_message.html',
         message=msg,
         users=users,
-        image=image
+        image=image,
+        replying_info=replying_info,
     )
 
 '''
@@ -237,58 +238,48 @@ def send_message(id):
 @login_required
 def draft_edit(id_message):
 
-    if request.method == 'DELETE':
+    code, obj, message = MessageManager.get_message(id_message, current_user.id)
 
-        code, message = MessageManager.delete_draft(id_message, current_user.get_id())
-        
+    if code != 200:
         flash(message)
-        return redirect(url_for('home.index'))
+        return redirect(url_for('messages.list_drafts'))
 
-    else:
-        code, obj, message = MessageManager.get_message(id_message, current_user.id)
+    draft, _, old_image, replying_info = obj
 
-        if code != 200:
-            flash(message)
-            return redirect(url_for('home.index'))
+    old_recipients = draft.recipients
+    form_recipients = [
+        {"name": "Recipient"}
+        for _ in (range(len(old_recipients)) if len(old_recipients) > 0 else range(1))
+    ]
+    form = EditMessageForm(recipients=form_recipients)
+    available_recipients = UserManager.get_recipients(current_user.get_id())
+    for recipient_form in form.recipients:
+        recipient_form.recipient.choices = available_recipients
 
-        draft = obj[0]
-        old_recipients = obj[1]
+    if request.method == "POST":
+        if form.validate_on_submit():
 
-        form_recipients = [
-            {"name": "Recipient"}
-            for _ in (range(len(old_recipients)) if len(old_recipients) > 0 else range(1))
-        ]
+            form_data = MessageManager.form_to_dict(form)
+            code = MessageManager.put_draft(form_data, current_user.id, id_message)
+            if(code == 201):
+                #flash("Draft correctly modified")
+                return redirect(url_for('messages.list_drafts'))
+            else:
+                flash("Something went wrong")
+                return redirect(url_for('home.index'))
 
-        replying_info = MessageManager.get_replying_info(draft.reply_to, current_user.get_id())
-
-        form = EditMessageForm(recipients=form_recipients)
-        available_recipients = UserManager.get_recipients(current_user.get_id())
-        for recipient_form in form.recipients:
-            recipient_form.recipient.choices = available_recipients
-            if request.method == "POST":
-                if form.validate_on_submit():
-
-                    form_data = MessageManager.form_to_dict(form)
-                    code = MessageManager.put_draft(form_data, current_user.id, id_message)
-                    if(code == 201):
-                        flash("Draft correctly modified")
-                        return redirect(url_for('messages.list_drafts'))
-                    else:
-                        flash("Something went wrong")
-                        return redirect(url_for('home.index'))
-
-        return render_template(
-            "draft.html",
-            edit=True,
-            form=form,
-            old_date=draft.delivery_date,
-            old_message=draft.message_body,
-            old_recs=old_recipients,
-            id_sender=draft.id_sender,
-            replying_info=replying_info,
-            available_recipients=available_recipients,
-            old_img=draft.img_path,
-        )
+    return render_template(
+        "draft.html",
+        edit=True,
+        form=form,
+        old_date=draft.delivery_date,
+        old_message=draft.message_body,
+        old_recs=old_recipients,
+        id_sender=draft.id_sender,
+        replying_info=replying_info,
+        available_recipients=available_recipients,
+        image=old_image
+    )
 
 @messages.route("/timeline", methods=["GET"])
 @login_required
@@ -335,11 +326,12 @@ def draft():
         recipient_form.recipient.choices = available_recipients
     if request.method == "POST":
         if form.validate_on_submit():
-
             form_data = MessageManager.form_to_dict(form)
+            if replying_info is not None:
+                form_data['reply_to'] = int(reply_to)
             code, _ = MessageManager.post_draft(form_data, current_user.id)
             if(code == 201):
-                flash("Draft correctly created")
+                #flash("Draft correctly created")
                 return redirect(url_for('messages.list_drafts'))
             else:
                 flash("Something went wrong while creating a new draft")

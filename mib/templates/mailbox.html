@@ -233,7 +233,7 @@
                               </div>
                               <div class="row actions-row h-50 justify-content-center align-items-center">
                               <!-- TODO: fix link -->
-                              {% set edit_url = url_for('home.index', id=id_message) %}
+                              {% set edit_url = url_for('messages.draft_edit', id_message=id_message) %}
                               {% set send_url = url_for('messages.send_message', id=id_message) %}
                               {% set forward_url = url_for('messages.forward_message', id=id_message) %}
                               {% set reply_url = url_for('messages.reply_to_message', id=id_message) %}

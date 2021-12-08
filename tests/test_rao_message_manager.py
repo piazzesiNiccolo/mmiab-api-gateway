@@ -137,12 +137,13 @@ class TestMessageManager:
             "message":message,
             "obj": obj,
             "users": {1: {'test': 'test value'}},
+            "replying_info": {},
             "image": {},
         })
         code_r, obj_r, message_r= MessageManager.get_message(1,1)
         assert code_r == code
         if code == 200:
-            (msg_r, _, _) = obj_r
+            (msg_r, _, _, _) = obj_r
             for k in obj:
                 getattr(msg_r, k) == obj[k]
         else:
@@ -352,28 +353,34 @@ class TestMessageManager:
 
 
 
-    @pytest.mark.parametrize('id_message, retval, res', [
-        (None, None, None),
-        (1, None, None),
+    @pytest.mark.parametrize('id_message, obj, users, res', [
+        (None, {}, {}, None),
+        (1, {}, {}, None),
         (
             1, 
-            (Message(message_body='test'), {}, None), 
-            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {},
+            {'message': {'message_body': 'test', 'delivery_date': None, 'id_sender': 1,}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
         ),
         (
             1, 
-            (Message(message_body='test'), {2: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
-            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {2: {'first_name': 'fn', 'last_name': 'ln'}}, 
+            {'message': {'message_body': 'test', 'delivery_date': None, 'id_sender': 1,}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
         ),
         (
             1, 
-            (Message(message_body='test'), {1: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
-            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {1: {'first_name': 'fn', 'last_name': 'ln'}},
+            {'message': {'message_body': 'test', 'delivery_date': None, 'id_sender': 1,}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
         ),
     ])
-    def test_get_replying_info(self, id_message, retval, res):
+    def test_get_replying_info(self, mock_get, id_message, obj, users, res):
         with mock.patch('mib.rao.message_manager.MessageManager.get_message') as m:
-            m.return_value = (None, retval, None)
+            mock_get.return_value = MockResponse(code=200, json={
+                'obj': obj,
+                'users': users,
+            }) 
             _res = MessageManager.get_replying_info(id_message, 1)
             assert _res == res
 
