@@ -123,8 +123,6 @@ def list_drafts():
     :return: sent messages mailbox template
     """
     code, messages, recipients = MessageManager.retrieve_drafts(current_user.id)
-    print('view', messages)
-    print('view', recipients)
     
     if code != 200:
         flash("Unexpected response from messages microservice!")
@@ -132,7 +130,6 @@ def list_drafts():
         #return redirect(url_for('mai'))
         #return mailbox
 
-    print('message_list', messages)
     return render_template(
         "mailbox.html",
         message_list=messages,
@@ -216,8 +213,6 @@ def list_received_messages():
             'yesterday': (yesterday.year, yesterday.month, yesterday.day),
         }
 
-    print('opened', opened)
-    print('senders', senders)
     return render_template(
         "mailbox.html",
         message_list=obj,

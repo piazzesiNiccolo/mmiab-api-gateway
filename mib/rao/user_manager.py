@@ -125,7 +125,6 @@ class UserManager:
     def create_user( cls, form_data ) -> Tuple[int, str, User]:
         form_data['birthdate'] = form_data['birthdate'].strftime("%d/%m/%Y")
 
-        print('keys', form_data.keys())
         if "profile_picture" in form_data.keys():
             file = form_data["profile_picture"]
             b64_file = base64.b64encode(file.read()).decode("utf8")
@@ -150,7 +149,6 @@ class UserManager:
             message = json_pl['message']
             if code == 201:
                 user = json_pl['user']
-                print('user', json_pl)
                 Utils.save_profile_picture(json_pl['profile_picture'])
 
             return code, message, user

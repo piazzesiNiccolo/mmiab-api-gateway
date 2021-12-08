@@ -1,9 +1,13 @@
-from flask import render_template
+from flask import flash
+from flask import redirect
+from flask import url_for
 
 
 def page_404(e): # pragma: no cover
-    return render_template('404.html'), 404
+    flash('404: Page Not Found')
+    return redirect(url_for('home.index'))
 
 
 def error_500(e): # pragma: no cover
-    return render_template('500.html'), 500
+    flash('500: Internal Server Error')
+    return redirect(url_for('home.index'))

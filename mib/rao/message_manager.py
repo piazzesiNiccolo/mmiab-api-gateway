@@ -35,7 +35,6 @@ class MessageManager:
         try:
             response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
             message = response.json()
-            print("message" + message)
             return response.status_code, message
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, None'''
@@ -220,7 +219,6 @@ class MessageManager:
                 url = "%s/message/list/sent/%s?%s" % (cls.message_endpoint(),str(id_usr),data_format)
 
             response = requests.get(url, timeout=cls.requests_timeout_seconds())
-            print(response.json())
             code = response.status_code
             if code == 200:
                 obj = [Message.build_from_json(m) for m in response.json()['messages']]
@@ -278,7 +276,6 @@ class MessageManager:
     def post_draft(cls, form_data: dict, id_sender: int):
 
         cls.format_draft_data(form_data, id_sender) 
-        print('form_data', form_data)
         try:
             url = "%s/draft" % (cls.message_endpoint())
             response = requests.post(url, json=form_data, timeout=cls.requests_timeout_seconds())
