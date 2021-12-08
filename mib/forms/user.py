@@ -41,7 +41,7 @@ class UserForm(FlaskForm):
             FileSize(max_size=16*1024*1024, message="max size allowed=16 MB"),
         ],
     )
-    phone = TelField( 'Phone', validators=[DataRequired(), Length(min=10, max=25, "Phone number must be between 10 and 25 digits")])
+    phone = TelField( 'Phone', validators=[DataRequired(), Length(min=10, max=25, message="Phone number must be between 10 and 25 digits")])
 
     display = [
         "email",
