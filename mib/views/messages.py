@@ -233,7 +233,7 @@ def draft_edit(id_message):
             return redirect(url_for('home.index'))
 
         draft = obj[0]
-        old_recipients = obj[1]
+        old_recipients = [key for key in obj[1].keys() if key != current_user.id]
 
         form_recipients = [
             {"name": "Recipient"}
