@@ -5,7 +5,7 @@ from mib.rao.notification_manager import NotificationManager
 class TestNotificationManager:
 
     def test_get_notifications(self, mock_get):
-        mock_get.reset(side_effects=True)
+        mock_get.reset_mock(side_effect=True)
         mock_get.return_value = MockResponse(json={
             "status":"success",
             "message":"Notifications have been sent correctly",

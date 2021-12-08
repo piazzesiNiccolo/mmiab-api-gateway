@@ -103,17 +103,19 @@
                         <label for="delivery_date">Delivery Date</label>
                     </div>
                     <div class="mb-3">
-                        {% if edit == True and old_img is not none %}
-                            <div class="text-center mb-3">
-                                <label for="old-img">Uploaded image<label>
+                        {% if edit == True and image['data'] != '' %}
+                            <div class="text-center my-3 vstack">
+                                <label for="old-img">Uploaded image</label>
                                 <img 
+                                    id="old-img"
+                                    name="old-img"
                                     class="rounded img-fluid" 
                                     src="data:image/{{ image['type'] }};base64,{{ image['data'] | safe }}"
                                     alt="mess" >
                             </div>
                         {% endif %}
                         <label for="image" class="form-label">
-                            {% if edit == True and old_img is not none %}
+                            {% if edit == True and image['data'] != '' %}
                                 Choose a different image
                             {% else %}
                                 Insert Image
@@ -142,7 +144,7 @@
                                         {% if edit == True %}
                                             {{'selected' if old_recs|length > 0 and old_recs[outer_loop.index0] == rcp[0]}}
                                         {% else %}
-                                            {{'selected' if replying_info is not none and replying_info['message'].id_sender == rcp[0]}}
+                                            {{'selected' if replying_info is not none and replying_info['message']['id_sender'] == rcp[0]}}
                                             {{'selected' if send_to is not none and send_to == rcp[0]|string }}
                                         {% endif %}
                                     >
@@ -154,7 +156,7 @@
                                 <input 
                                     type="hidden"
                                     name="recipients-{{ loop.index0 }}-recipient"
-                                    value="{{replying_info['message'].id_sender}}"
+                                    value="{{replying_info['message']['id_sender']}}"
                                 />
                                 {%endif%}
                                 <button 
@@ -186,11 +188,11 @@
         <div class="row justify-content-center mb-2" style="margin-top: 60px;">
             <div class="col-8">
                 <div class="hstack">
-                    <span class="m-1 fs-5 text-navy">{{replying_info['message'].delivery_date|delivery_datetime_format}}</span>
+                    <span class="m-1 fs-5 text-navy">{{replying_info['message']['delivery_date']}}</span>
                     <span class="m-1 ms-auto fw-bold fs-5 text-navy">replying to:</span>
                     <a href="{{url_for('users.user_info', id=replying_info['user'].id)}}"
                         <span class="m-1 text-decoration-none badge bg-primary text-white rounded-pill fs-5">
-                            {{ replying_info['user'].firstname }} {{ replying_info['user'].lastname }}
+                            {{ replying_info['user']['first_name'] }} {{ replying_info['user']['last_name'] }}
                         </span>
                     </a>
                 </div>
@@ -199,7 +201,7 @@
         <div class="row justify-content-center mb-2">
             <div class="col-8">
                 <div class="shadow-sm border border-success rounded-3 text-navy fs-5" style="padding: 20px 35px 50px 35px; min-height: 200px;">
-                    {{ replying_info['message'].message_body }}
+                    {{ replying_info['message']['message_body'] }}
                 </div>
             </div>
         </div>

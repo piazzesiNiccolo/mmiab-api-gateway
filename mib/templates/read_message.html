@@ -96,7 +96,7 @@
         <div class="row justify-content-center mb-2">
             <div class="col-7">
                 <div class="hstack">
-                    <span class="m-1 fs-5 text-navy">{{replying_info['message']['delivery_date']|delivery_datetime_format}}</span>
+                    <span class="m-1 fs-5 text-navy">{{replying_info['message']['delivery_date']}}</span>
                     <span class="m-1 ms-auto fw-bold fs-5 text-navy">replying to:</span>
                     <a href="{{url_for('users.user_info', id=replying_info['user']['id'])}}"
                         <span class="m-1 text-decoration-none badge bg-primary text-white rounded-pill fs-5">

@@ -111,6 +111,32 @@ class MessageManager:
 
         return code, message
 
+    @classmethod
+    def reply_to_message(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/message/reply/{id_message}/{id_user}'
+        try:
+            response = requests.post(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+        except:
+            return 500, "Unexpected response from messages microservice!"
+
+        return code, message
+
+    @classmethod
+    def forward_message(cls, id_message: int, id_user: int):
+        url = f'{cls.message_endpoint()}/message/forward/{id_message}/{id_user}'
+        try:
+            response = requests.post(url, timeout=cls.requests_timeout_seconds())
+            code = response.status_code
+            message = response.json()['message']
+            obj = None
+            if code == 200:
+                obj = Message.build_from_json(response.json()['obj'])
+        except:
+            return 500, None, "Unexpected response from messages microservice!"
+
+        return code, obj, message
 
     @classmethod
     def get_message(cls, id_mess: int, id_usr: int) -> Tuple[int, Message, str]:
@@ -125,7 +151,9 @@ class MessageManager:
                 _users = _json['users']
                 users = {int(k): v for k,v in _users.items()}
                 image = _json['image']
-                obj = (msg, users, image)
+                _rp_info = _json['replying_info']
+                replying_info = cls.format_replying_info(_rp_info, users)
+                obj = (msg, users, image, replying_info)
             message = response.json()['message']
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, None, "Unexpected response from messages microservice!"
@@ -150,7 +178,8 @@ class MessageManager:
                 obj = [Message.build_from_json(m) for m in response.json()['messages']]
                 _senders = response.json()['senders']
                 senders = {int(k): v for k,v in _senders.items()}
-                opened = response.json()['has_opened']
+                _opened = response.json()['has_opened']
+                opened = {int(k):v for k,v in _opened.items()}
             else:
                 obj, senders, opened = [], {}, []
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
@@ -249,6 +278,7 @@ class MessageManager:
     def post_draft(cls, form_data: dict, id_sender: int):
 
         cls.format_draft_data(form_data, id_sender) 
+        print('form_data', form_data)
         try:
             url = "%s/draft" % (cls.message_endpoint())
             response = requests.post(url, json=form_data, timeout=cls.requests_timeout_seconds())
@@ -262,34 +292,51 @@ class MessageManager:
             return 500, None
 
     @classmethod
+    def format_replying_info(cls, msg, users):
+        if len(msg.keys()) > 0:
+            message_body = msg['message_body']
+            id_sender = int(msg['id_sender'])
+            user_dict = users.get(id_sender, None)
+            if user_dict is not None:
+                _user = {
+                    'id': id_sender,
+                    'first_name': user_dict['first_name'],
+                    'last_name': user_dict['last_name'],
+                }
+            else:
+                _user = {
+                    'id': 0,
+                    'first_name': 'Anonymous',
+                    'last_name': '',
+                }
+
+            return ({
+                "message": {
+                    "id_sender":id_sender,
+                    "message_body":  message_body,
+                    "delivery_date": msg['delivery_date']
+                },
+                "user": _user,
+            })
+
+        return None
+
+    @classmethod
     def get_replying_info(cls, id_message: int, id_user: int):
 
         if id_message is not None:
-            _, obj, _ = cls.get_message(id_message, id_user)
-            if obj != None:
-                message, users, _ = obj
-                body_message = message.body_message
-                user_dict = users.get(id_user, None)
-                if user_dict is not None:
-                    _user = {
-                        'id': id_user,
-                        'first_name': user_dict['first_name'],
-                        'last_name': user_dict['last_name'],
-                    }
-                else:
-                    _user = {
-                        'id': 0,
-                        'first_name': 'Anonymous',
-                        'last_name': '',
-                    }
-
-                return ({
-                    "message": {
-                        "body_message":  body_message,
-                        "delivery_date": message.delivery_date
-                    },
-                    "user": _user,
-                })
+            try:
+                url = "%s/message/replying_info/%s/%s" % (cls.message_endpoint(), str(id_message),str(id_user))
+                response = requests.get(url, timeout=cls.requests_timeout_seconds())
+                code = response.status_code
+                _json = response.json()
+                if code == 200:
+                    obj = _json['obj']
+                    _users = _json['users']
+                    users = {int(k): v for k,v in _users.items()}
+                    return cls.format_replying_info(obj, users)
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+                return None
 
         return None
 

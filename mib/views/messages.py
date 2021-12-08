@@ -39,12 +39,32 @@ def withdraw_message(id):
 @messages.route('/message/<int:id>/forward', methods=['GET'])
 @login_required
 def forward_message(id):
-    pass
+    code, msg, message = MessageManager.forward_message(id, current_user.id)
+    if code != 200:
+        flash(message)
+        return redirect(url_for('messages.list_received_messages'))
+
+    fw_data = {
+        'message_body': msg.message_body,
+    }
+
+    code, id_message = MessageManager.post_draft(fw_data, current_user.id)
+    if code != 201:
+        flash("Something went wrong while creating a new draft")
+        return redirect(url_for('messages.list_received_messages'))
+
+    return redirect(url_for('messages.draft_edit', id_message=id_message))
 
 @messages.route('/message/<int:id>/reply', methods=['GET'])
 @login_required
 def reply_to_message(id):
-    pass
+    code, message = MessageManager.reply_to_message(id, current_user.id)
+    
+    if code != 200:
+        flash(message)
+        return redirect(url_for('messages.list_received_messages'))
+
+    return redirect(url_for('messages.draft', reply_to=id))
 
 
 @messages.route("/message/<int:id>/read", methods=["GET"])
@@ -58,14 +78,14 @@ def read_messages(id):
         flash(message)
         return redirect(url_for('messages.list_received_messages'))
 
-    (msg, users, image) = obj
-    print('image', image)
+    (msg, users, image, replying_info) = obj
     
     return render_template(
         'read_message.html',
         message=msg,
         users=users,
-        image=image
+        image=image,
+        replying_info=replying_info,
     )
 
 '''
@@ -214,15 +234,15 @@ def send_message(id):
     flash(message)
     return redirect(url_for('messages.list_sent_messages'))
 
-@messages.route('/draft/<int:id_message>', methods=["DELETE", "POST", "GET"])
+@messages.route('/draft/<int:id_message>/edit', methods=["GET", "POST"])
 @login_required
 def draft_edit(id_message):
 
-    if request.method == 'DELETE':
+    code, obj, message = MessageManager.get_message(id_message, current_user.id)
 
-        code, message = MessageManager.delete_draft(id_message, current_user.get_id())
-        
+    if code != 200:
         flash(message)
+
         return redirect(url_for('home.index'))
 
     else:
@@ -318,14 +338,15 @@ def draft():
         recipient_form.recipient.choices = available_recipients
     if request.method == "POST":
         if form.validate_on_submit():
-
             form_data = MessageManager.form_to_dict(form)
+            if replying_info is not None:
+                form_data['reply_to'] = int(reply_to)
             code, _ = MessageManager.post_draft(form_data, current_user.id)
             if(code == 201):
-                flash("Draft correctly created")
+                #flash("Draft correctly created")
                 return redirect(url_for('messages.list_drafts'))
             else:
-                flash("Something went wrong")
+                flash("Something went wrong while creating a new draft")
                 return redirect(url_for('home.index'))
 
     return render_template(
