@@ -126,6 +126,60 @@ class TestMessageManager:
         assert code_r == 500
         assert message_r == "Unexpected response from messages microservice!"
 
+    @pytest.mark.parametrize("code, message", [ 
+        (200, "Message replyable"),
+        (404, "Message not found"),
+        (403, "User not allowed to reply to the draft")
+    ])
+    def test_reply_to_message(self, mock_post, code, message):
+        mock_post.reset_mock(side_effect=True)
+        mock_post.return_value= MockResponse(code=code, json={
+            "message": message,
+        })
+        code_r, message_r = MessageManager.reply_to_message(1,1)
+        assert code_r == code
+        assert message_r == message
+
+    @pytest.mark.parametrize("exception", [ 
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+    ])
+    def test_reply_to_message_error(self, mock_post, exception):
+        mock_post.reset_mock(side_effect=True)
+        mock_post.side_effect = exception()
+        code_r, message_r = MessageManager.reply_to_message(1,1)
+        assert code_r == 500
+        assert message_r == "Unexpected response from messages microservice!"
+
+    @pytest.mark.parametrize("code, message, obj", [ 
+        (200, "Message replyable", {}),
+        (404, "Message not found", {}),
+        (403, "User not allowed to reply to the draft", {})
+    ])
+    def test_forward_message(self, mock_post, code, message, obj):
+        mock_post.reset_mock(side_effect=True)
+        mock_post.return_value= MockResponse(code=code, json={
+            "message": message,
+            "obj": obj,
+        })
+        code_r, obj_r, message_r = MessageManager.forward_message(1,1)
+        assert code_r == code
+        assert message_r == message
+        if code != 200:
+            assert obj_r == None
+
+    @pytest.mark.parametrize("exception", [ 
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+    ])
+    def test_forward_message_error(self, mock_post, exception):
+        mock_post.reset_mock(side_effect=True)
+        mock_post.side_effect = exception()
+        code_r, obj_r, message_r = MessageManager.forward_message(1,1)
+        assert code_r == 500
+        assert message_r == "Unexpected response from messages microservice!"
+        assert obj_r == None
+
     @pytest.mark.parametrize("code, obj, message", [ 
         (200, test_message_create, "Message retrieved"),
         (404, {}, "Message not found"),
@@ -137,12 +191,13 @@ class TestMessageManager:
             "message":message,
             "obj": obj,
             "users": {1: {'test': 'test value'}},
+            "replying_info": {},
             "image": {},
         })
         code_r, obj_r, message_r= MessageManager.get_message(1,1)
         assert code_r == code
         if code == 200:
-            (msg_r, _, _) = obj_r
+            (msg_r, _, _, _) = obj_r
             for k in obj:
                 getattr(msg_r, k) == obj[k]
         else:
@@ -175,7 +230,7 @@ class TestMessageManager:
             "status":"success",
             "messages": messages,
             "senders":{},
-            "has_opened": [],
+            "has_opened": {},
             "images":[]
         })
         _code, obj, opened, senders = MessageManager.retrieve_received_messages(1, data=data)
@@ -342,40 +397,73 @@ class TestMessageManager:
         assert _code == 500
         assert _id == None
 
+    @pytest.mark.parametrize("code", [
+        201,
+        404,
+    ])
+    def test_put_draft(self, mock_put, code):
+        mock_put.reset_mock(side_effect=True)
+        mock_put.return_value = MockResponse(code=code, json={})
+        
+        _code = MessageManager.put_draft({}, 1, 1)
+        assert _code == code
 
+    @pytest.mark.parametrize("exception", [
+        requests.exceptions.ConnectTimeout,
+        requests.exceptions.Timeout,
+    ])
+    def test_put_draft_error(self, mock_put, exception):
+        mock_put.reset_mock(side_effect=True)
+        mock_put.side_effect = exception()
+        
+        _code = MessageManager.put_draft({}, 1, 1)
+        assert _code == 500
 
-
-
-
-
-
-
-
-
-    @pytest.mark.parametrize('id_message, retval, res', [
-        (None, None, None),
-        (1, None, None),
+    @pytest.mark.parametrize('code, id_message, obj, users, res', [
+        (200, None, {}, {}, None),
+        (200, 1, {}, {}, None),
         (
-            1, 
-            (Message(message_body='test'), {}, None), 
-            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+            200, 1, 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {},
+            {'message': {'message_body': 'test', 'delivery_date': None, 'id_sender': 1,}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
         ),
         (
-            1, 
-            (Message(message_body='test'), {2: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
-            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
+            200, 1, 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {2: {'first_name': 'fn', 'last_name': 'ln'}}, 
+            {'message': {'message_body': 'test', 'delivery_date': None, 'id_sender': 1,}, 'user': {'first_name': 'Anonymous', 'id': 0, 'last_name': ''}} 
         ),
         (
-            1, 
-            (Message(message_body='test'), {1: {'first_name': 'fn', 'last_name': 'ln'}}, None), 
-            {'message': {'message_body': 'test', 'delivery_date': None}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
+            200, 1, 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {1: {'first_name': 'fn', 'last_name': 'ln'}},
+            {'message': {'message_body': 'test', 'delivery_date': None, 'id_sender': 1,}, 'user': {'first_name': 'fn', 'id': 1, 'last_name': 'ln'}} 
+        ),
+        (
+            404, 1, 
+            {'message_body': 'test', 'id_sender': 1, 'delivery_date': None}, 
+            {1: {'first_name': 'fn', 'last_name': 'ln'}},
+            None,
         ),
     ])
-    def test_get_replying_info(self, id_message, retval, res):
+    def test_get_replying_info(self, mock_get, code, id_message, obj, users, res):
         with mock.patch('mib.rao.message_manager.MessageManager.get_message') as m:
-            m.return_value = (None, retval, None)
+            mock_get.return_value = MockResponse(code=code, json={
+                'obj': obj,
+                'users': users,
+            }) 
             _res = MessageManager.get_replying_info(id_message, 1)
             assert _res == res
 
+    @pytest.mark.parametrize("exception", [
+        requests.exceptions.ConnectTimeout,
+        requests.exceptions.Timeout,
+    ])
+    def test_get_replying_info_error(self, mock_get, exception):
+        mock_get.reset_mock(side_effect=True)
+        mock_get.side_effect=exception()
+        _res = MessageManager.get_replying_info(1, 1)
+        assert _res == None
 
 
