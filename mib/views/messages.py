@@ -234,6 +234,7 @@ def draft_edit(id_message):
 
         draft = obj[0]
         old_recipients = [key for key in obj[1].keys() if key != current_user.id]
+        print(obj[2])
 
         form_recipients = [
             {"name": "Recipient"}
@@ -269,6 +270,7 @@ def draft_edit(id_message):
             replying_info=replying_info,
             available_recipients=available_recipients,
             old_img=draft.img_path,
+            image=obj[2]
         )
 
 @messages.route("/timeline", methods=["GET"])
