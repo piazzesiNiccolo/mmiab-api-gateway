@@ -72,7 +72,7 @@ class TestViewsUsers:
     def test_delete_user(self, test_client, mock_current_user, code, message):
         with mock.patch("mib.rao.user_manager.UserManager.delete_user") as m:
             m.return_value = MockResponse(code=code)
-            resp = test_client.get("/delete_user/1")
+            resp = test_client.get("/user/1/delete")
             assert resp.status_code == 302
 
     @pytest.mark.parametrize(
