@@ -72,7 +72,7 @@ class TestViewsUsers:
     def test_delete_user(self, test_client, mock_current_user, code, message):
         with mock.patch("mib.rao.user_manager.UserManager.delete_user") as m:
             m.return_value = MockResponse(code=code)
-            resp = test_client.get("/delete_user/1")
+            resp = test_client.get("/user/1/delete")
             assert resp.status_code == 302
 
     @pytest.mark.parametrize(
@@ -266,9 +266,9 @@ class TestViewsUsers:
             assert message in get_flashed_messages()
             assert resp.status_code == 302
 
-    @pytest.mark.parametrize('query', ['', '?q=abc'])
+    @pytest.mark.parametrize("query", ["", "?q=abc"])
     def test_get_recipients(self, test_client, mock_current_user, query):
-        with mock.patch('mib.rao.user_manager.UserManager.get_recipients') as m:
+        with mock.patch("mib.rao.user_manager.UserManager.get_recipients") as m:
             m.return_value = {}
-            response = test_client.get('/recipients' + query)
+            response = test_client.get("/recipients" + query)
             assert response.status_code == 200

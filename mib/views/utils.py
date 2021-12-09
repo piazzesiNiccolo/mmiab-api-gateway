@@ -1,10 +1,10 @@
 from flask import Blueprint, abort
 
 # this is only a utility view
-utils = Blueprint('util', __name__)
+utils = Blueprint("util", __name__)
 
 
-@utils.route('/server_error')
+@utils.route("/server_error")
 def generate_server_error():
     """
     This method will generate an error

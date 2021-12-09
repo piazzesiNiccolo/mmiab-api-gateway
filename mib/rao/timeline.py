@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import List
 
-class Timeline:
 
+class Timeline:
     def __init__(
-        self, 
-        sent: List[int] = [], 
+        self,
+        sent: List[int] = [],
         received: List[int] = [],
-        year: int = datetime.today().year, 
+        year: int = datetime.today().year,
         month: int = datetime.today().month,
         **kwargs
     ):
@@ -19,6 +19,3 @@ class Timeline:
     @staticmethod
     def build_from_json(**kwargs):
         return Timeline(**kwargs)
-
-
-

@@ -15,14 +15,16 @@ _ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png"]
 
 delivery_format = "%H:%M %d/%m/%Y"
 
+
 class RecipientForm(FlaskForm):
     recipient = f.SelectField("Recipient", default=[])
     search = f.StringField("Search Users", default="")
 
+
 class EditMessageForm(FlaskForm):
     message_body = f.TextAreaField("Message", validators=[InputRequired()])
     delivery_date = DateTimeLocalField(
-        "Delivery Date", format='%Y-%m-%dT%H:%M', validators=[Optional()]
+        "Delivery Date", format="%Y-%m-%dT%H:%M", validators=[Optional()]
     )
     recipients = f.FieldList(f.FormField(RecipientForm))
     display = ["message_body", "delivery_date", "recipients"]

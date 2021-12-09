@@ -2,7 +2,7 @@ from datetime import datetime
 from datetime import timedelta
 import calendar
 from flask import Blueprint, redirect, render_template, url_for, flash, request
-from flask_login import (login_user, login_required)
+from flask_login import login_user, login_required
 from flask_login import current_user
 
 from typing import Text
@@ -13,58 +13,63 @@ from mib.rao.user_manager import UserManager
 from mib.auth.user import User
 
 
-messages = Blueprint('messages', __name__)
+messages = Blueprint("messages", __name__)
 
-@messages.route('/draft/<int:id>/delete', methods=['GET'])
+
+@messages.route("/draft/<int:id>/delete", methods=["GET"])
 @login_required
 def delete_draft(id):
     _, message = MessageManager.delete_draft(id, current_user.id)
     flash(message)
-    return redirect(url_for('messages.list_drafts'))
+    return redirect(url_for("messages.list_drafts"))
 
-@messages.route('/message/<int:id>/delete', methods=['GET'])
+
+@messages.route("/message/<int:id>/delete", methods=["GET"])
 @login_required
 def delete_read_message(id):
     _, message = MessageManager.delete_read_message(id, current_user.id)
     flash(message)
-    return redirect(url_for('messages.list_received_messages'))
+    return redirect(url_for("messages.list_received_messages"))
 
-@messages.route('/message/<int:id>/withdraw', methods=['GET'])
+
+@messages.route("/message/<int:id>/withdraw", methods=["GET"])
 @login_required
 def withdraw_message(id):
     _, message = MessageManager.withdraw_message(id, current_user.id)
     flash(message)
-    return redirect(url_for('messages.list_sent_messages'))
+    return redirect(url_for("messages.list_sent_messages"))
 
-@messages.route('/message/<int:id>/forward', methods=['GET'])
+
+@messages.route("/message/<int:id>/forward", methods=["GET"])
 @login_required
 def forward_message(id):
     code, msg, message = MessageManager.forward_message(id, current_user.id)
     if code != 200:
         flash(message)
-        return redirect(url_for('messages.list_received_messages'))
+        return redirect(url_for("messages.list_received_messages"))
 
     fw_data = {
-        'message_body': msg.message_body,
+        "message_body": msg.message_body,
     }
 
     code, id_message = MessageManager.post_draft(fw_data, current_user.id)
     if code != 201:
         flash("Something went wrong while creating a new draft")
-        return redirect(url_for('messages.list_received_messages'))
+        return redirect(url_for("messages.list_received_messages"))
 
-    return redirect(url_for('messages.draft_edit', id_message=id_message))
+    return redirect(url_for("messages.draft_edit", id_message=id_message))
 
-@messages.route('/message/<int:id>/reply', methods=['GET'])
+
+@messages.route("/message/<int:id>/reply", methods=["GET"])
 @login_required
 def reply_to_message(id):
     code, message = MessageManager.reply_to_message(id, current_user.id)
-    
+
     if code != 200:
         flash(message)
-        return redirect(url_for('messages.list_received_messages'))
+        return redirect(url_for("messages.list_received_messages"))
 
-    return redirect(url_for('messages.draft', reply_to=id))
+    return redirect(url_for("messages.draft", reply_to=id))
 
 
 @messages.route("/message/<int:id>/read", methods=["GET"])
@@ -73,15 +78,15 @@ def read_messages(id):
     """
     Let the user read the selected message
     """
-    code, obj, message = MessageManager.get_message(id,current_user.id)
+    code, obj, message = MessageManager.get_message(id, current_user.id)
     if code != 200:
         flash(message)
-        return redirect(url_for('messages.list_received_messages'))
+        return redirect(url_for("messages.list_received_messages"))
 
     (msg, users, image, replying_info) = obj
-    
+
     return render_template(
-        'read_message.html',
+        "read_message.html",
         message=msg,
         users=users,
         image=image,
@@ -97,12 +102,12 @@ def list_drafts():
     :return: sent messages mailbox template
     """
     code, messages, recipients = MessageManager.retrieve_drafts(current_user.id)
-    
+
     if code != 200:
         flash("Unexpected response from messages microservice!")
-        #TODO check return in case of failure
-        #return redirect(url_for('mai'))
-        #return mailbox
+        # TODO check return in case of failure
+        # return redirect(url_for('mai'))
+        # return mailbox
 
     return render_template(
         "mailbox.html",
@@ -112,26 +117,29 @@ def list_drafts():
         calendar_view=None,
     )
 
+
 @messages.route("/message/list/sent", methods=["GET"])
 @login_required
 def list_sent_messages():
-    ''''
+    """ '
     If the user specifies year, month and day, it returns the timeline
     else if the previous parameters are not specified, it returns the list of sent messages
         with no filters
-    '''
+    """
 
-    year = request.args.get('y',None)
-    month = request.args.get('m',None)
-    day = request.args.get('d',None)
+    year = request.args.get("y", None)
+    month = request.args.get("m", None)
+    day = request.args.get("d", None)
 
     try:
         y_i, m_i, d_i = int(year), int(month), int(day)
         day_dt = datetime(y_i, m_i, d_i)
     except (ValueError, TypeError):
         day_dt = None
-        
-    code, messages, recipients = MessageManager.retrieve_sent_messages(current_user.id, data=day_dt)
+
+    code, messages, recipients = MessageManager.retrieve_sent_messages(
+        current_user.id, data=day_dt
+    )
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
@@ -140,11 +148,10 @@ def list_sent_messages():
         tomorrow = day_dt + timedelta(days=1)
         yesterday = day_dt - timedelta(days=1)
         calendar_view = {
-            'today': (day_dt.year, day_dt.month, day_dt.day),
-            'tomorrow': (tomorrow.year, tomorrow.month, tomorrow.day),
-            'yesterday': (yesterday.year, yesterday.month, yesterday.day),
+            "today": (day_dt.year, day_dt.month, day_dt.day),
+            "tomorrow": (tomorrow.year, tomorrow.month, tomorrow.day),
+            "yesterday": (yesterday.year, yesterday.month, yesterday.day),
         }
-
 
     return render_template(
         "mailbox.html",
@@ -154,26 +161,29 @@ def list_sent_messages():
         list_type="sent",
     )
 
+
 @messages.route("/message/list/received", methods=["GET"])
 @login_required
 def list_received_messages():
-    ''''
+    """ '
     If the user specifies year, month and day, it returns the timeline
     else if the previous parameters are not specified, it returns the list of received messages
         with no filters
-    '''
+    """
 
-    year = request.args.get('y',None)
-    month = request.args.get('m',None)
-    day = request.args.get('d',None)
+    year = request.args.get("y", None)
+    month = request.args.get("m", None)
+    day = request.args.get("d", None)
 
     try:
         y_i, m_i, d_i = int(year), int(month), int(day)
         day_dt = datetime(y_i, m_i, d_i)
     except (ValueError, TypeError):
         day_dt = None
-        
-    code, obj, opened, senders = MessageManager.retrieve_received_messages(current_user.id, data=day_dt)
+
+    code, obj, opened, senders = MessageManager.retrieve_received_messages(
+        current_user.id, data=day_dt
+    )
     if code != 200:
         flash("Unexpected response from messages microservice!")
 
@@ -182,9 +192,9 @@ def list_received_messages():
         tomorrow = day_dt + timedelta(days=1)
         yesterday = day_dt - timedelta(days=1)
         calendar_view = {
-            'today': (day_dt.year, day_dt.month, day_dt.day),
-            'tomorrow': (tomorrow.year, tomorrow.month, tomorrow.day),
-            'yesterday': (yesterday.year, yesterday.month, yesterday.day),
+            "today": (day_dt.year, day_dt.month, day_dt.day),
+            "tomorrow": (tomorrow.year, tomorrow.month, tomorrow.day),
+            "yesterday": (yesterday.year, yesterday.month, yesterday.day),
         }
 
     return render_template(
@@ -196,14 +206,16 @@ def list_received_messages():
         list_type="received",
     )
 
-@messages.route('/message/<int:id>/send', methods=['GET'])
+
+@messages.route("/message/<int:id>/send", methods=["GET"])
 @login_required
 def send_message(id):
     _, message = MessageManager.send_message(id, current_user.get_id())
     flash(message)
-    return redirect(url_for('messages.list_sent_messages'))
+    return redirect(url_for("messages.list_sent_messages"))
 
-@messages.route('/draft/<int:id_message>/edit', methods=["GET", "POST"])
+
+@messages.route("/draft/<int:id_message>/edit", methods=["GET", "POST"])
 @login_required
 def draft_edit(id_message):
 
@@ -211,7 +223,7 @@ def draft_edit(id_message):
 
     if code != 200:
         flash(message)
-        return redirect(url_for('messages.list_drafts'))
+        return redirect(url_for("messages.list_drafts"))
 
     draft, _, old_image, replying_info = obj
 
@@ -230,12 +242,12 @@ def draft_edit(id_message):
 
             form_data = MessageManager.form_to_dict(form)
             code = MessageManager.put_draft(form_data, current_user.id, id_message)
-            if(code == 201):
-                #flash("Draft correctly modified")
-                return redirect(url_for('messages.list_drafts'))
+            if code == 201:
+                # flash("Draft correctly modified")
+                return redirect(url_for("messages.list_drafts"))
             else:
                 flash("Something went wrong")
-                return redirect(url_for('home.index'))
+                return redirect(url_for("home.index"))
 
     return render_template(
         "draft.html",
@@ -250,12 +262,13 @@ def draft_edit(id_message):
         image=old_image,
     )
 
+
 @messages.route("/timeline", methods=["GET"])
 @login_required
 def get_timeline_month():
 
-    _year = request.args.get('y',None)
-    _month = request.args.get('m',None)
+    _year = request.args.get("y", None)
+    _month = request.args.get("m", None)
     try:
         y_i, m_i = int(_year), int(_month)
         dt = datetime(y_i, m_i, 1)
@@ -267,7 +280,7 @@ def get_timeline_month():
     code, timeline = MessageManager.get_timeline_month(current_user.id, dt)
     if code != 200:
         flash("Unexpected response from messages microservice!")
-        return redirect(url_for('messages.list_received_messages'))
+        return redirect(url_for("messages.list_received_messages"))
 
     return render_template(
         "calendar.html",
@@ -282,7 +295,8 @@ def get_timeline_month():
         },
     )
 
-@messages.route('/draft', methods=["POST", "GET"])
+
+@messages.route("/draft", methods=["POST", "GET"])
 @login_required
 def draft():
     reply_to = request.args.get("reply_to", None)
@@ -297,14 +311,14 @@ def draft():
         if form.validate_on_submit():
             form_data = MessageManager.form_to_dict(form)
             if replying_info is not None:
-                form_data['reply_to'] = int(reply_to)
+                form_data["reply_to"] = int(reply_to)
             code, _ = MessageManager.post_draft(form_data, current_user.id)
-            if(code == 201):
-                #flash("Draft correctly created")
-                return redirect(url_for('messages.list_drafts'))
+            if code == 201:
+                # flash("Draft correctly created")
+                return redirect(url_for("messages.list_drafts"))
             else:
                 flash("Something went wrong while creating a new draft")
-                return redirect(url_for('home.index'))
+                return redirect(url_for("home.index"))
 
     return render_template(
         "draft.html",
