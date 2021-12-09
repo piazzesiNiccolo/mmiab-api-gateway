@@ -65,11 +65,101 @@ paths:
           description: Redirects to the homepage
 
 ###################### Messages ###########################
-
-  /message/{id_mess}/read/{id_usr}:
+  
+  /message/{id}/delete:
     get:
       tags: [ Message ]
-      summary: Let an user read the selected message
+      summary: Lets a recipient to delete a read message
+      parameters:
+      - name: id
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        302:
+          description: Redirects to the page with received messages
+
+  /draft/{id}/delete:
+    get:
+      tags: [ Message ]
+      summary: Lets a user to delete a draft
+      parameters:
+      - name: id
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        302:
+          description: Redirects to the page with drafts of the user
+
+  /message/{id}/withdraw:
+    get:
+      tags: [ Message ]
+      summary: Lets a user to withdraw an already sent and not arrived 
+      parameters:
+      - name: id
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        302:
+          description: Redirects to the page with sent messages
+
+  /message/{id}/forward:
+    get:
+      tags: [ Message ]
+      summary: Lets a user to forward a sent or received message
+      parameters:
+      - name: id
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        302:
+          description: Redirects to the page to edit a draft with the forwarded message
+
+  /message/{id}/reply:
+    get:
+      tags: [ Message ]
+      summary: Lets a user to reply to the specified message with a new draft
+      parameters:
+      - name: id
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        302:
+          description: Redirects to the page to create a draft
+
+  /message/{id}/send:
+    get:
+      tags: [ Message ]
+      summary: Lets a user to send a draft
+      parameters:
+      - name: id
+        in: path
+        description: Message's unique identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        302:
+          description: Redirects to the page showing sent messages
+
+  /message/{id_mess}/read:
+    get:
+      tags: [ Message ]
+      summary: Lets a user to read the selected message
       parameters:
       - name: id_mess
         in: path
@@ -77,29 +167,15 @@ paths:
         required: true
         schema:
           type: integer
-      - name: id_usr
-        in: path
-        description: User's unique identifier
-        required: true
-        schema:
-          type: integer
       responses:
         200:
           description: Renders the messages previousy selected
-        404:
-          description: Message not found
 
-  /message/list/sent/{id_usr}:
+  /message/list/sent:
     get:
       tags: [ Message ]
       summary: Return list 
       parameters:
-      - name: id_usr
-        in: path
-        description: User's unique identifier
-        required: true
-        schema:
-          type: integer
       - name: y
         in: query
         description: year identifier
@@ -117,21 +193,13 @@ paths:
           type: integer
       responses:
         200:
-          description: Return list of sent messages
-        401:
-          description: Error on retriving messages
+          description: Renders a template showing sent messages
 
-  /message/list/received/{id_usr}:
+  /message/list/received:
     get:
       tags: [ Message ]
       summary: Return list 
       parameters:
-      - name: id_usr
-        in: path
-        description: User's unique identifier
-        required: true
-        schema:
-          type: integer
       - name: y
         in: query
         description: year identifier
@@ -149,9 +217,7 @@ paths:
           type: integer
       responses:
         200:
-          description: Return list of received messages
-        401:
-          description: Error on retriving messages
+          description: Renders a template showing received messages
 
   /timeline:
     get:
@@ -170,27 +236,15 @@ paths:
             type: integer
       responses:
           200:
-            description: Return list of messages
-          401:
-            description: Error on retriving messages
+            description: Renders a template showing a monthly timeline
 
-
-  /message/list/drafted/{id_usr}:
+  /message/list/draft:
     get:
       tags: [ Message ]
       summary: Return list 
-      parameters:
-      - name: id_usr
-        in: path
-        description: User's unique identifier
-        required: true
-        schema:
-          type: integer
       responses:
         200:
-          description: Return list of drafted messages
-        401:
-          description: Error on retriving messages
+          description: Renders a template showing drafts for the current user
 
 ###################### Users ###########################
 
@@ -214,8 +268,8 @@ paths:
       tags: [ User ]
       summary: Shows the profile page of the current user
       responses:
-        200:
-          description: Renders the user_info template, filled with the infos form and the current user's profile
+        302:
+          description: Redirects to the profile page for the authenticated user
     
   /profile/update:
     get:
@@ -245,6 +299,7 @@ paths:
       parameters:
         - in: query
           name: q
+          required: true
           schema:
             type: string
           description: search users with the keyword specified
@@ -272,10 +327,18 @@ paths:
         302:
           description: Redirects to the correct profile page, depending on the type of the user
   
-  /user/delete:
+  /user/{id}/delete:
     get:
       tags: [ User ]
       description: Delete the logged user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: the identifier of the user to delete
       responses:
         302:
           description: User deleted, it redirects to the index page
@@ -295,6 +358,7 @@ paths:
       parameters:
         - in: path
           name: id
+          required: true
           schema:
             type: integer
             format: int64
@@ -305,12 +369,12 @@ paths:
 
   /blacklist/{id}/remove:
     get:
-    get:
       tags: [ User ]
       description: Removes the user identified by id from the blacklist of the current user
       parameters:
         - in: path
           name: id
+          required: true
           schema:
             type: integer
             format: int64
@@ -327,6 +391,46 @@ paths:
         302:
           description: Content filter on/off, it redirects to user profile page
 
+  /report/{id}:
+    get:
+      tags: [ User ]
+      description: Lets the current user to report the user identified by the id parameter
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The id of the user to report
+      responses:
+        302:
+          description: Redirect to the profile page if the report went well, to the home page otherwise
+
+  /recipients:
+    get:
+      tags: [ User ]
+      description: Returns a json containing infos about available recipients for the current user
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: a string to filter recipients
+      responses:
+        200:
+          description: Returns a json with infos about recipients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    anyOf:
+                      - type: integer
+                        format: int64
+                      - type: string
 
 
 ################################# Components #########################################3

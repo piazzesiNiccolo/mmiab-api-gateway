@@ -42,7 +42,7 @@ def create_user():
     return render_template('create_user.html', form=form)
 
 
-@users.route('/delete_user/<int:id>', methods=['GET', 'POST'])
+@users.route('/user/<int:id>/delete', methods=['GET'])
 @login_required
 def delete_user(id):
     """Deletes the data of the user from the database.

@@ -88,32 +88,6 @@ def read_messages(id):
         replying_info=replying_info,
     )
 
-'''
-@messages.route("/message/list/sent", methods=["GET"])
-@login_required
-def mailbox_list_sent():
-    """
-    Displays messages sent by current user
-    :return: sent messages mailbox template
-    """
-    if current_user.is_authenticated:
-        code, obj = MessageManager.get_sended_message_by_id_user(current_user.id)
-    
-    if code != 200:
-        flash("Error while retriving the message")
-        #TODO check return in case of failure
-        #return redirect(url_for('mai'))
-        #return mailbox
-
-
-    return render_template(
-        "mailbox.html",
-        message_list=obj,
-        list_type="sent",
-        withdraw=current_user.lottery_points > 0,
-    )
-'''
-
 
 @messages.route("/message/list/draft", methods=["GET"])
 @login_required
