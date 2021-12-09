@@ -9,6 +9,7 @@ servers:
 
 paths:
 ###################### Home ###########################
+
   /:
     get:
       tags: [ Home ]
@@ -16,6 +17,14 @@ paths:
       responses:
         200:
           description: Renders the index.html template
+
+  /server_error:
+    get:
+      tags: [ Home ]
+      summary: Displays an interna server error page
+      responses:
+        500:
+          description: Internal server error
 
 ###################### Authentication ###########################
 
@@ -263,7 +272,7 @@ paths:
 
   /draft:
     get:
-      summary: renders a template that lets the user to create a new draft
+      summary: Renders a template that lets the user to create a new draft
       parameters:
         - in: query
           name: reply_to
@@ -271,6 +280,135 @@ paths:
           schema:
             type: integer
             format: int64
+        - in: query
+          name: send_to
+          description: identifier of the user to which one wants to send a message
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Renders a template that lets the user to create a new draft
+    post:
+      summary: Creates a new message
+      parameters:
+        - in: query
+          name: reply_to
+          description: identifier of the message to reply to
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: send_to
+          description: identifier of the user to which one wants to send a message
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Draft'
+        responses:
+          200:
+            description: A new draft is created
+
+  /draft/{id}/edit:
+    get:
+      summary: Renders a template that lets the user to edit an existing draft
+      parameters:
+        - in: path
+          name: id_message
+          required: true
+          description: id of the message to edit
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Renders a template that lets the user to create a new draft
+    post:
+      summary: Edits an existing message
+      parameters:
+        - in: path
+          name: id_message
+          required: true
+          description: id of the message to edit
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Draft'
+        responses:
+          200:
+            description: The draft is edited
+
+################## Notifications #######################
+
+  /notifications:
+    get:
+      tags: [ Notifications ]
+      summary: Returns a json contanining infos about notifications for the user
+      responses:
+        200:
+          description: Returns a json with infos about notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      sender_notify:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            $ref: '#/components/schemas/Notification'
+                      recipient_notify:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            $ref: '#/components/schemas/Notification'
+                      lottery_notify:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            $ref: '#/components/schemas/Notification'
+
+################## Lottery #############################
+
+  /lottery/participate:
+    get:
+      tags: [ Lottery ]
+      summary: Renders a template that lets the user to participate to the lottery
+      responses:
+        200:
+          description: Return a template used to participate to the lottery
+    post:
+      tags: [ Lottery ]
+      summary: Register the paricipation of the user to the lottery
+      responses:
+        200:
+          description: The user has participated to the lottery
+
+  /lottery:
+    get:
+      tags: [ Lottery ]
+      summary: Shows the state of the lottery for the current user
+      responses:
+        200:
+          description: Returns a template showing the choice of the user and the date of the next extraction
+        302:
+          description: Redirects to the page for the participation to the lottery
 
 ###################### Users ###########################
 
@@ -537,3 +675,43 @@ components:
           example: '+39 3332222384'
           minLength: 10
           maxLength: 25
+    Draft:
+      required:
+        - message_body
+      type: object
+      properties:
+        message_body:
+          type: string
+          description: Body of the message
+        delivery_date:
+          type: string
+          description: Delivery date of the message
+        recipients:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: integer
+              format: inte64
+        image:
+          type: string
+          description: The image to attach to the message
+    Notification:
+      type: object
+      properties:
+        id_message:
+          type: integer
+          format: int64
+        id_user:
+          type: integer
+          format: int64
+        for_sender:
+          type: boolean
+        for_recipient:
+          type: boolean
+        for_lottery:
+          type: boolean
+        from_recipient:
+          type: integer
+          format: int64
+
