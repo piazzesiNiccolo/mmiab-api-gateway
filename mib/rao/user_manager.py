@@ -10,6 +10,9 @@ from typing import Tuple
 from mib.rao.utils import Utils
 
 class UserManager:
+    """
+    Wrapper class for user request
+    """
     
     @classmethod
     def users_endpoint(cls):

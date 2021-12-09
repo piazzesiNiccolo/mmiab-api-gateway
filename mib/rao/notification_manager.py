@@ -3,6 +3,10 @@ from flask import current_app as app
 from typing import Tuple
 
 class NotificationManager:
+    """
+    Wrapper class for notification request
+    """
+
     @classmethod
     def notifications_endpoint(cls):
         return app.config['NOTIFICATIONS_MS_URL']

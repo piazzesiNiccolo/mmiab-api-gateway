@@ -17,9 +17,11 @@ from typing import Tuple
 import requests
 
 class MessageManager:
+    """
+    Wrapper class for message request
+    """
 
     @classmethod
-
     def message_endpoint(cls):
         return app.config['MESSAGES_MS_URL']
     

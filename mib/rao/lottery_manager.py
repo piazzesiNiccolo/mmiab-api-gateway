@@ -1,7 +1,11 @@
 import requests
 from flask import current_app as app
 from requests.api import request
+
 class LotteryManager:
+    """
+    Wrapper class for lottery request
+    """
 
     @classmethod
     def lottery_endpoint(cls):
