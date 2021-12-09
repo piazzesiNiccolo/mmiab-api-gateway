@@ -28,18 +28,6 @@ class MessageManager:
         return app.config['REQUESTS_TIMEOUT_SECONDS']
 
     
-    '''@classmethod
-    def get_message(cls, id_message, id_user):
-
-        endpoint = '%s/message/%s/%s' % (cls.message_endpoint(cls), str(id_message), str(id_user))
-        try:
-            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
-            message = response.json()
-            return response.status_code, message
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, None'''
-    
-
     @classmethod
     def send_message(cls, id_message: int, id_user: int) -> Tuple[int, str]:
         endpoint = '%s/message/send/%s/%s' % (cls.message_endpoint(), str(id_message), str(id_user))
@@ -49,30 +37,6 @@ class MessageManager:
             return response.status_code, message
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return 500, "Unexpected response from messages microservice!"
-
-    '''
-    @classmethod
-    def get_draft(cls, id_message, id_user) -> Tuple[int, str]:
-        #TODO:fix
-        endpoint = '%s/message/%s/%s' % (cls.message_endpoint(), str(id_message), str(id_user))
-        try:
-            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
-            message = response.json()["message"]
-            return response.status_code
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected reponse from user microservice"
-
-    @classmethod
-    def get_message(cls, id_message, id_user) -> Tuple[int, str]:
-
-        endpoint = '%s/message/%s/%s' % (cls.message_endpoint(), str(id_message), str(id_user))
-        try:
-            response = requests.get(endpoint, timeout=cls.requests_timeout_seconds())
-            message = response.json()["message"]
-            return response.status_code
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return 500, "Unexpected reponse from user microservice"
-    '''
 
     @classmethod
     def delete_draft(cls, id_message: int, id_user: int):
