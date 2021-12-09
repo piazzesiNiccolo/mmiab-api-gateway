@@ -1,16 +1,26 @@
 from datetime import datetime
 
-class Message:
 
-    def __init__(self, id_message=None, id_sender=None, message_body='',
-        delivery_date=None, recipients=[], img_path=None, to_filter=False,
-        reply_to=None, is_sent=False, is_arrived=False, **kwargs
+class Message:
+    def __init__(
+        self,
+        id_message=None,
+        id_sender=None,
+        message_body="",
+        delivery_date=None,
+        recipients=[],
+        img_path=None,
+        to_filter=False,
+        reply_to=None,
+        is_sent=False,
+        is_arrived=False,
+        **kwargs,
     ):
         self.id_message = id_message
         self.id_sender = id_sender
         self.message_body = message_body
         try:
-            dt = datetime.strptime(delivery_date, '%H:%M %d/%m/%Y')
+            dt = datetime.strptime(delivery_date, "%H:%M %d/%m/%Y")
             self.delivery_date = dt
         except (ValueError, TypeError):
             self.delivery_date = None
@@ -33,8 +43,3 @@ class Message:
             return self.extra_data[attrname]
         else:
             raise AttributeError(f"Attribute {attrname} does not exist")
-
-
-
-
-

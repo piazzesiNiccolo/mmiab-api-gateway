@@ -3,14 +3,14 @@ import pytest
 
 import mock
 
+
 class TestViewsNotifications:
-    @pytest.mark.parametrize("code, status",[ 
-        (200, "success"),
-        (500, "failed")
-    ])
+    @pytest.mark.parametrize("code, status", [(200, "success"), (500, "failed")])
     def test_get_notifications(self, mock_current_user, test_client, code, status):
-        with mock.patch("mib.rao.notification_manager.NotificationManager.get_notifications") as m:
+        with mock.patch(
+            "mib.rao.notification_manager.NotificationManager.get_notifications"
+        ) as m:
             m.return_value = code, {}
             resp = test_client.get("/notifications")
-            assert json.loads(resp.data)["notifications"]["status"] == status 
+            assert json.loads(resp.data)["notifications"]["status"] == status
             assert resp.status_code == 200

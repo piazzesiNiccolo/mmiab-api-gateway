@@ -22,7 +22,9 @@ def next_lottery_date():
     first_day = today.replace(day=1) + timedelta(days_in_month(today))
     return first_day.strftime("%d/%m/%Y")
 
-lottery = Blueprint('lottery', __name__)
+
+lottery = Blueprint("lottery", __name__)
+
 
 @lottery.route("/lottery/participate", methods=["GET", "POST"])
 @login_required
@@ -46,36 +48,37 @@ def participate():
                         is_participating=True,
                         choice=form.choice.data,
                     )
-                else: #we assume that calling add_participant from here can't return 200
+                else:  # we assume that calling add_participant from here can't return 200
                     flash(obj)
                     return render_template(
-                    "lottery.html",
-                    date=next_lottery_date(),
-                    is_participating=False,
-                    form=form,
-                )
+                        "lottery.html",
+                        date=next_lottery_date(),
+                        is_participating=False,
+                        form=form,
+                    )
         return render_template(
-                    "lottery.html",
-                    date=next_lottery_date(),
-                    is_participating=False,
-                    form=form,
-                )
+            "lottery.html",
+            date=next_lottery_date(),
+            is_participating=False,
+            form=form,
+        )
     elif code == 500:
         flash(choice)
         return render_template(
-                    "lottery.html",
-                    date=next_lottery_date(),
-                    is_participating=False,
-                    form=form,
-                )
+            "lottery.html",
+            date=next_lottery_date(),
+            is_participating=False,
+            form=form,
+        )
     else:
         return render_template(
             "lottery.html",
             form=form,
             date=next_lottery_date(),
             is_participating=True,
-            choice=choice
+            choice=choice,
         )
+
 
 @lottery.route("/lottery", methods=["GET"])
 @login_required
@@ -95,5 +98,7 @@ def next_lottery():
     elif code == 404:
         return redirect(url_for("lottery.participate"))
     else:
-        flash(choice) # a bit confusing maybe, but choice becomes an error message when a timeout occurs
+        flash(
+            choice
+        )  # a bit confusing maybe, but choice becomes an error message when a timeout occurs
         return redirect(url_for("lottery.participate"))

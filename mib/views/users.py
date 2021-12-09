@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask import jsonify
-from flask_login import (login_user, login_required)
+from flask_login import login_user, login_required
 from flask_login import current_user
 
 from typing import Text
@@ -9,10 +9,10 @@ from mib.forms import UserForm, EditProfileForm
 from mib.rao.user_manager import UserManager
 from mib.auth.user import User
 
-users = Blueprint('users', __name__)
+users = Blueprint("users", __name__)
 
 
-@users.route('/create_user/', methods=['GET', 'POST'])
+@users.route("/create_user/", methods=["GET", "POST"])
 def create_user():
     """This method allows the creation of a new user into the database
 
@@ -24,7 +24,9 @@ def create_user():
     if form.validate_on_submit():
 
         form_dict = {
-            k : form.data[k] for k in form.data if k not in ["csrf_token", "submit"] and form.data[k] is not None
+            k: form.data[k]
+            for k in form.data
+            if k not in ["csrf_token", "submit"] and form.data[k] is not None
         }
         code, message, user = UserManager.create_user(form_dict)
 
@@ -35,14 +37,14 @@ def create_user():
                 login_user(to_login)
             flash(message)
         else:
-            flash('Unexpected response from users microservice!')
+            flash("Unexpected response from users microservice!")
 
-        return redirect(url_for('home.index'))
+        return redirect(url_for("home.index"))
 
-    return render_template('create_user.html', form=form)
+    return render_template("create_user.html", form=form)
 
 
-@users.route('/user/<int:id>/delete', methods=['GET'])
+@users.route("/user/<int:id>/delete", methods=["GET"])
 @login_required
 def delete_user(id):
     """Deletes the data of the user from the database.
@@ -57,24 +59,25 @@ def delete_user(id):
     response = UserManager.delete_user(id)
     if response.status_code != 202:
         flash("Error while deleting the user")
-        return redirect(url_for('users.user_profile', id=id))
-        
-    return redirect(url_for('home.index'))
+        return redirect(url_for("users.user_profile", id=id))
 
-@users.route('/content_filter', methods=['GET'])
+    return redirect(url_for("home.index"))
+
+
+@users.route("/content_filter", methods=["GET"])
 @login_required
 def set_content_filter():
 
     response = UserManager.toggle_content_filter(current_user.id)
     if response.status_code != 200:
         flash("Error to set content filter")
-        return redirect(url_for('users.user_info', id=current_user.id))
-    
-    flash("Content filter value successfully changed!")
-    return redirect(url_for('users.user_info', id=current_user.id))
-    
+        return redirect(url_for("users.user_info", id=current_user.id))
 
-@users.route('/users', methods=['GET'])
+    flash("Content filter value successfully changed!")
+    return redirect(url_for("users.user_info", id=current_user.id))
+
+
+@users.route("/users", methods=["GET"])
 @login_required
 def users_list():
     _q = request.args.get("q", None)
@@ -85,27 +88,28 @@ def users_list():
             flash("User not found")
         else:
             flash("Unexpected response from users microservice!")
-        return redirect(url_for('home.index'))
+        return redirect(url_for("home.index"))
 
     return render_template(
-        "users_list.html", 
+        "users_list.html",
         list=users,
         propics=propics,
     )
 
+
 @users.route("/user/<int:id>", methods=["GET"])
 @login_required
-def user_info(id : int) -> Text:
+def user_info(id: int) -> Text:
     user, propic = UserManager.get_user_by_id(id, cache_propic=current_user.id == id)
 
     if user == None:
         flash("User not found!")
-        return redirect(url_for('home.index'))
+        return redirect(url_for("home.index"))
 
     blocked, reported = UserManager.get_user_status(current_user.id, id)
 
     return render_template(
-        "user_info.html", 
+        "user_info.html",
         user=user,
         propic=propic,
         blocked=blocked,
@@ -116,7 +120,7 @@ def user_info(id : int) -> Text:
 @users.route("/profile/edit", methods=["POST", "GET"])
 @login_required
 def edit_user_profile() -> Text:
-    
+
     """
     route handling editing of user info
     """
@@ -125,15 +129,17 @@ def edit_user_profile() -> Text:
     if form.validate_on_submit():
 
         form_dict = {
-            k : form.data[k] for k in form.data if k not in ["csrf_token", "submit"] and form.data[k] is not None
+            k: form.data[k]
+            for k in form.data
+            if k not in ["csrf_token", "submit"] and form.data[k] is not None
         }
-        
+
         code, message = UserManager.update_user(form_dict, current_user.get_id())
 
         if code in [200, 201, 400, 404]:
             flash(message)
             if code == 200:
-                return redirect(url_for('users.edit_user_profile'))
+                return redirect(url_for("users.edit_user_profile"))
         else:
             flash("Unexpected response from users microservice!")
 
@@ -141,10 +147,8 @@ def edit_user_profile() -> Text:
 
     user, propic = UserManager.get_user_by_id(current_user.get_id())
     return render_template(
-        "create_user.html", 
-        form=form, 
-        user_data=user.__dict__,
-        propic=propic)
+        "create_user.html", form=form, user_data=user.__dict__, propic=propic
+    )
 
 
 @users.route("/profile", methods=["GET"])
@@ -152,69 +156,72 @@ def edit_user_profile() -> Text:
 def user_profile() -> Text:
     return redirect(url_for("users.user_info", id=current_user.get_id()))
 
-@users.route("/blacklist", methods=['GET'])
+
+@users.route("/blacklist", methods=["GET"])
 @login_required
 def blacklist():
     _q = request.args.get("q", None)
-    blacklist, propics, code = UserManager.get_users_list(current_user.id, _q, blacklist=True)
+    blacklist, propics, code = UserManager.get_users_list(
+        current_user.id, _q, blacklist=True
+    )
 
     if code != 200:
         if code == 404:
             flash("User not found")
         else:
             flash("Unexpected response from users microservice!")
-        return redirect(url_for('home.index'))
-
+        return redirect(url_for("home.index"))
 
     return render_template(
-        "users_list.html", 
-        list=blacklist, 
+        "users_list.html",
+        list=blacklist,
         propics=propics,
         blacklist=True,
     )
 
-@users.route("/blacklist/<int:id>/add", methods=['GET'])
+
+@users.route("/blacklist/<int:id>/add", methods=["GET"])
 @login_required
 def add_to_blacklist(id):
     code, message = UserManager.add_to_blacklist(current_user.id, id)
 
     if code in [200, 201, 403, 404]:
         flash(message)
-        return redirect(url_for('users.blacklist'))
+        return redirect(url_for("users.blacklist"))
     else:
         flash("Unexpected response from users microservice!")
-        return redirect(url_for('home.index'))
+        return redirect(url_for("home.index"))
 
-@users.route("/blacklist/<int:id>/remove", methods=['GET'])
+
+@users.route("/blacklist/<int:id>/remove", methods=["GET"])
 @login_required
 def remove_from_blacklist(id):
     code, message = UserManager.remove_from_blacklist(current_user.id, id)
 
     if code in [200, 404]:
         flash(message)
-        return redirect(url_for('users.blacklist'))
+        return redirect(url_for("users.blacklist"))
     else:
         flash("Unexpected response from users microservice!")
-        return redirect(url_for('home.index'))
+        return redirect(url_for("home.index"))
 
-@users.route("/report/<int:id>", methods=['GET'])
+
+@users.route("/report/<int:id>", methods=["GET"])
 @login_required
 def report_user(id):
     code, message = UserManager.report_user(current_user.id, id)
 
     if code in [200, 201, 403, 404]:
         flash(message)
-        return redirect(url_for('users.user_info', id=id))
+        return redirect(url_for("users.user_info", id=id))
     else:
         flash("Unexpected response from users microservice!")
-        return redirect(url_for('home.index'))
+        return redirect(url_for("home.index"))
 
-@users.route("/recipients", methods=['GET'])
+
+@users.route("/recipients", methods=["GET"])
 @login_required
 def get_recipients():
-    query = request.args.get('q', None)
+    query = request.args.get("q", None)
     recipients = UserManager.get_recipients(current_user.id, query=query)
     return jsonify(recipients=recipients)
-
-
-
