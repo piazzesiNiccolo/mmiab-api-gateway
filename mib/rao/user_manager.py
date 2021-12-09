@@ -228,12 +228,10 @@ class UserManager:
         """
         payload = dict(email=email, password=password)
         try:
-            print('trying response....')
             response = requests.post('%s/authenticate' % cls.users_endpoint(),
                                      json=payload,
                                      timeout=cls.requests_timeout_seconds()
                                      )
-            print('received response....')
             json_response = response.json()
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
