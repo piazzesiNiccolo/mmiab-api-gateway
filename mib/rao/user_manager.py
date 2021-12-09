@@ -11,6 +11,10 @@ from mib.rao.utils import Utils
 
 
 class UserManager:
+    """
+    Wrapper class for user request
+    """
+    
     @classmethod
     def users_endpoint(cls):
         return app.config["USERS_MS_URL"]

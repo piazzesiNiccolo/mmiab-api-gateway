@@ -4,6 +4,10 @@ from requests.api import request
 
 
 class LotteryManager:
+    """
+    Wrapper class for lottery request
+    """
+    
     @classmethod
     def lottery_endpoint(cls):
         return app.config["LOTTERY_MS_URL"]
