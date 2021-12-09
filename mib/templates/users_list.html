@@ -23,7 +23,7 @@
            }
            // TODO: fix link 
            function sendToUser(user_id) {
-                var base_url = "{{url_for('home.index')}}";
+                var base_url = "/draft";
                 location.href = base_url + "?send_to=" + user_id;
            }
            function unblockUser(user_id) {
@@ -98,7 +98,7 @@
                                                 {% set propic = propics[loop.index0] %}
                                                 <img 
                                                     src="data:image/{{ propic['type'] }};base64,{{ propic['data'] | safe }}"
-                                                    height="80px">-->
+                                                    height="80px">
                                             </a>
                                         </div>
                                     </div>
@@ -137,6 +137,7 @@
                                             </button>
                                         </a>
                                         {% else %}
+                                        {% if user.id != current_user.id %}
                                         <a style="cursor: pointer">
                                             <button class="btn btn-primary text-white px-2" onclick="(function() { sendToUser({{user.id}}); })();" >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send-plus" viewBox="0 0 16 16">
@@ -144,6 +145,7 @@
             </svg>
                                             </button>
                                         </a>
+                                        {% endif %}
                                         {% endif %}
                                     </div>
                                 </div>

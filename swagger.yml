@@ -77,6 +77,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         302:
           description: Redirects to the page with received messages
@@ -92,6 +93,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         302:
           description: Redirects to the page with drafts of the user
@@ -107,6 +109,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         302:
           description: Redirects to the page with sent messages
@@ -122,6 +125,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         302:
           description: Redirects to the page to edit a draft with the forwarded message
@@ -137,6 +141,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         302:
           description: Redirects to the page to create a draft
@@ -152,6 +157,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         302:
           description: Redirects to the page showing sent messages
@@ -167,6 +173,7 @@ paths:
         required: true
         schema:
           type: integer
+          format: int64
       responses:
         200:
           description: Renders the messages previousy selected
@@ -181,16 +188,19 @@ paths:
         description: year identifier
         schema:
           type: integer
+          format: int64
       - name: m
         in: query
         description: month identifier
         schema:
           type: integer
+          format: int64
       - name: d
         in: query
         description: day identifier
         schema:
           type: integer
+          format: int64
       responses:
         200:
           description: Renders a template showing sent messages
@@ -205,16 +215,19 @@ paths:
         description: year identifier
         schema:
           type: integer
+          format: int64
       - name: m
         in: query
         description: month identifier
         schema:
           type: integer
+          format: int64
       - name: d
         in: query
         description: day identifier
         schema:
           type: integer
+          format: int64
       responses:
         200:
           description: Renders a template showing received messages
@@ -222,18 +235,20 @@ paths:
   /timeline:
     get:
       tags: [ Message ]
-        summary: Return list 
-        parameters:
-        - name: y
-          in: query
-          description: year identifier
-          schema:
-            type: integer
-        - name: m
-          in: query
-          description: month identifier
-          schema:
-            type: integer
+      summary: Return list 
+      parameters:
+      - name: y
+        in: query
+        description: year identifier
+        schema:
+          type: integer
+          format: int64
+      - name: m
+        in: query
+        description: month identifier
+        schema:
+          type: integer
+          format: int64
       responses:
           200:
             description: Renders a template showing a monthly timeline
@@ -245,6 +260,17 @@ paths:
       responses:
         200:
           description: Renders a template showing drafts for the current user
+
+  /draft:
+    get:
+      summary: renders a template that lets the user to create a new draft
+      parameters:
+        - in: query
+          name: reply_to
+          description: identifier of the message to reply to
+          schema:
+            type: integer
+            format: int64
 
 ###################### Users ###########################
 
