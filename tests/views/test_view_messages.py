@@ -1,6 +1,7 @@
 from flask.helpers import get_flashed_messages
 import pytest
 import mock
+from mock import PropertyMock
 import flask
 from datetime import datetime
 from flask import session
@@ -186,6 +187,7 @@ class TestViewMessages:
         with mock.patch(
             "mib.rao.message_manager.MessageManager.retrieve_sent_messages"
         ) as m:
+            type(mock_current_user.return_value).lottery_points = PropertyMock(return_value = 0)
             m.return_value = code, obj, recipients
             response = test_client.get("/message/list/sent")
             assert response.status_code == 200
@@ -219,6 +221,7 @@ class TestViewMessages:
         with mock.patch(
             "mib.rao.message_manager.MessageManager.retrieve_sent_messages"
         ) as m:
+            type(mock_current_user.return_value).lottery_points = PropertyMock(return_value = 0)
             m.return_value = code, obj, recipients
             response = test_client.get("/message/list/sent?y=2021&m=01&d=01")
             assert response.status_code == 200
