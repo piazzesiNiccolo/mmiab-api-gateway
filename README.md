@@ -5,18 +5,17 @@ University of Pisa.
 
 ## Team info
 
-- The *squad id* is **<SQUAD_ID>**
-- The *team leader* is <team_leader>
+- The *squad id* is **6**
+- The *team leader* is *Lorenzo Volpi*
 
 #### Members
 
-| Name and Surname | Email |
-| ---------------- | ----- |
-|                  |       |
-|                  |       |
-|                  |       |
-|                  |       |
-|                  |       |
+| Name and Surname   | Email                        |
+| ------------------ | ---------------------------- |
+| *Niccolò Piazzesi* | n.piazzesi@studenti.unipi.it |
+| *Lorenzo Volpi*    | l.volpi7@studenti.unipi.it   |
+| *Paolo Lanza*      | p.lanza@studenti.unipi.it    |
+| *Davide Morucci*   | d.morucci@studenti.unipi.it  |
 
 
 ## Instructions
