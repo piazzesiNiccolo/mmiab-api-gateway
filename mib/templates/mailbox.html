@@ -281,7 +281,7 @@
                                       </a>
                                   </div>
                                   {% endif %}
-                                  {% if list_type=='sent' and withdraw == True %}
+                                  {% if list_type=='sent' and withdraw == True and m.is_arrived == False %}
                                   <div class="col-2 withdraw-action">
                                       <a href="{{ withdraw_url }}" class="text-decoration-none text-success">
                                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-down" viewBox="0 0 16 16">

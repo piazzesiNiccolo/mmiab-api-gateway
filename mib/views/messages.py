@@ -158,6 +158,7 @@ def list_sent_messages():
         message_list=messages,
         recipients=recipients,
         calendar_view=calendar_view,
+        withdraw=(current_user.lottery_points > 0),
         list_type="sent",
     )
 

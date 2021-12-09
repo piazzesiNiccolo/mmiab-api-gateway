@@ -23,7 +23,7 @@ handler = logging.StreamHandler(sys.stdout)
 handler.setLevel((LOG_LEVEL.upper()))
 handler.setFormatter(
     logging.Formatter(
-        "%(asctime)s - Go Out Safe - %(name)s - %(levelname)s - %(message)s"
+        "%(asctime)s - Message in a Bottle - %(name)s - %(levelname)s - %(message)s"
     )
 )
 logger.addHandler(handler)
