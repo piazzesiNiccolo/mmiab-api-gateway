@@ -61,7 +61,7 @@
                     {% endif %}
                 {% endwith %}
 
-                {% set fields = ['first_name', 'last_name', 'nickname', 'email', 'password', 'birthdate', 'location', 'profile_picture'] %}
+                {% set fields = ['first_name', 'last_name', 'nickname', 'email', 'password', 'birthdate', 'location','phone', 'profile_picture'] %}
                 {% for field in fields %}
                     {% if form[field].errors %}
                         {% for e in form[field].errors %}
