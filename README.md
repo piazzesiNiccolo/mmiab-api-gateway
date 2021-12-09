@@ -1,4 +1,7 @@
 # Message In a Bottle - API Gateway
+[![CircleCI](https://circleci.com/gh/piazzesiNiccolo/mmiab-api-gateway/tree/main.svg?style=svg)](https://circleci.com/gh/piazzesiNiccolo/mmiab-api-gateway/tree/main)
+
+[![codecov](https://codecov.io/gh/piazzesiNiccolo/mmiab-api-gateway/branch/main/graph/badge.svg?token=43A03YC664)](https://codecov.io/gh/piazzesiNiccolo/mmiab-api-gateway)
 
 This is the source code of Message in a Bottle application, self project of *Advanced Software Engineering* course,
 University of Pisa.
